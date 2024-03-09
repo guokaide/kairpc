@@ -1,4 +1,4 @@
-# 获取用户信息
+### 获取用户信息
 POST http://localhost:8080
 Content-Type: application/json
 
@@ -6,4 +6,24 @@ Content-Type: application/json
   "service": "com.kai.kairpc.demo.api.UserService",
   "method": "findById",
   "args": [100]
+}
+
+### 获取订单信息
+POST http://localhost:8080
+Content-Type: application/json
+
+{
+"service": "com.kai.kairpc.demo.api.OrderService",
+"method": "findById",
+"args": [100]
+}
+
+### 甚至可以访问 toString 方法，这是不对的
+POST http://localhost:8080
+Content-Type: application/json
+
+{
+  "service": "com.kai.kairpc.demo.api.OrderService",
+  "method": "toString",
+  "args": []
 }
