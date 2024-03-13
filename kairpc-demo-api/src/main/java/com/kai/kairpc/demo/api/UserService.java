@@ -5,5 +5,9 @@ package com.kai.kairpc.demo.api;
  */
 public interface UserService {
     User findById(int id);
-    
+
+    // 返回基本类型
+    int getId(int id);
+
+    String getName();
 }

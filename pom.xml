@@ -24,6 +24,7 @@
 		<module>kairpc-core</module>
 		<module>kairpc-demo-api</module>
 		<module>kairpc-demo-provider</module>
+		<module>kairpc-demo-consumer</module>
 	</modules>
 
 	<build>
