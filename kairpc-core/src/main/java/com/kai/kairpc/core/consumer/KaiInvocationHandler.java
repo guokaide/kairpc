@@ -4,6 +4,7 @@ import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import com.kai.kairpc.core.api.RpcRequest;
 import com.kai.kairpc.core.api.RpcResponse;
+import com.kai.kairpc.core.util.MethodUtils;
 import okhttp3.*;
 
 import java.io.IOException;
@@ -23,15 +24,13 @@ public class KaiInvocationHandler implements InvocationHandler {
 
     @Override
     public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
-        // TODO: 避免调用 toString() 等方法
-        String methodName = method.getName();
-        if ("toString".equals(methodName) || "hashCode".equals(methodName)) {
+        if (MethodUtils.checkLocalMethod(method)) {
             return null;
         }
 
         RpcRequest rpcRequest = new RpcRequest();
         rpcRequest.setService(service.getCanonicalName());
-        rpcRequest.setMethod(method.getName());
+        rpcRequest.setMethodSign(MethodUtils.methodSign(method));
         rpcRequest.setArgs(args);
 
         RpcResponse rpcResponse = post(rpcRequest);

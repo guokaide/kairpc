@@ -4,8 +4,18 @@ Content-Type: application/json
 
 {
   "service": "com.kai.kairpc.demo.api.UserService",
-  "method": "findById",
+  "methodSign": "findById@1_int",
   "args": [100]
+}
+
+### 获取用户信息
+POST http://localhost:8080
+Content-Type: application/json
+
+{
+  "service": "com.kai.kairpc.demo.api.UserService",
+  "methodSign": "findById@2_int_java.lang.String",
+  "args": [200, "Kai"]
 }
 
 ### 获取订单信息

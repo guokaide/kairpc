@@ -36,12 +36,21 @@ public class KairpcDemoProviderApplication {
     @Bean
     ApplicationRunner applicationRunner() {
         return x -> {
+            // 1. test 1 parameter
             RpcRequest request = new RpcRequest();
             request.setService("com.kai.kairpc.demo.api.UserService");
-            request.setMethod("findById");
+            request.setMethodSign("findById@1_int");
             request.setArgs(new Object[]{100});
             RpcResponse response = invoke(request);
             System.out.println("return : " + response.getData());
+
+            // 2. test 2 parameters
+            RpcRequest request1 = new RpcRequest();
+            request1.setService("com.kai.kairpc.demo.api.UserService");
+            request1.setMethodSign("findById@2_int_java.lang.String");
+            request1.setArgs(new Object[]{100, "Kai"});
+            RpcResponse response1 = invoke(request);
+            System.out.println("return : " + response1.getData());
         };
     }
 
