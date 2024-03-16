@@ -1,15 +1,22 @@
 package com.kai.kairpc.core.consumer;
 
 import com.kai.kairpc.core.api.LoadBalancer;
+import com.kai.kairpc.core.api.RegistryCenter;
 import com.kai.kairpc.core.api.Router;
 import com.kai.kairpc.core.cluster.RoundRobinBalancer;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.ApplicationRunner;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.annotation.Order;
 
+import java.util.List;
+
 @Configuration
 public class ConsumerConfig {
+
+    @Value("${kairpc.providers}")
+    String servers;
 
     @Bean
     ConsumerBootstrap consumerBootstrap() {
@@ -36,5 +43,10 @@ public class ConsumerConfig {
     @Bean
     public Router router() {
         return Router.DEFAULT;
+    }
+
+    @Bean(initMethod = "start", destroyMethod = "stop")
+    public RegistryCenter consumerRegisterCenter() {
+        return new RegistryCenter.StaticRegistryCenter(List.of(servers.split(",")));
     }
 }
