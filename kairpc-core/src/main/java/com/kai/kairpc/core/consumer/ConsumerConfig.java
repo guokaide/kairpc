@@ -1,5 +1,8 @@
 package com.kai.kairpc.core.consumer;
 
+import com.kai.kairpc.core.api.LoadBalancer;
+import com.kai.kairpc.core.api.Router;
+import com.kai.kairpc.core.cluster.RoundRobinBalancer;
 import org.springframework.boot.ApplicationRunner;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -23,5 +26,15 @@ public class ConsumerConfig {
             consumerBootstrap.start();
             System.out.println("consumerBootstrapRunner started ...");
         };
+    }
+
+    @Bean
+    public LoadBalancer loadBalancer() {
+        return new RoundRobinBalancer();
+    }
+
+    @Bean
+    public Router router() {
+        return Router.DEFAULT;
     }
 }

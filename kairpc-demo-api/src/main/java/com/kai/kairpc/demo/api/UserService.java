@@ -11,6 +11,10 @@ public interface UserService {
     // 返回基本类型
     int getId(int id);
 
+    long getId(long id);
+
+    long getId(User user);
+
     String getName();
 
     String getName(int id);

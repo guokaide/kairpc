@@ -11,7 +11,10 @@ import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Import;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 
+@RestController
 @SpringBootApplication
 @Import(ConsumerConfig.class)
 public class KairpcDemoConsumerApplication {
@@ -29,18 +32,29 @@ public class KairpcDemoConsumerApplication {
         SpringApplication.run(KairpcDemoConsumerApplication.class, args);
     }
 
+    @RequestMapping("/")
+    public User findById(int id) {
+        return userService.findById(id);
+    }
+
     @Bean
     public ApplicationRunner applicationRunner() {
         return x -> {
-            User user = userService.findById(1);
-            System.out.println("RPC result userService.findById(1) = " + user);
+//            System.out.println(userService.getId(10));
+            // TODO: 待修复类型问题
+//            System.out.println("RPC result userService.getId(new User(100, \"Kai\") = " +
+//                    userService.getId(new User(100, "Kai")));
 
-            User userKai = userService.findById(1, "kai");
-            System.out.println("RPC result userService.findById(1, \"kai\") = " + userKai);
 
-            System.out.println(userService.getName());
-
-            System.out.println(userService.getName(123));
+//            User user = userService.findById(1);
+//            System.out.println("RPC result userService.findById(1) = " + user);
+//
+//            User userKai = userService.findById(1, "kai");
+//            System.out.println("RPC result userService.findById(1, \"kai\") = " + userKai);
+//
+//            System.out.println(userService.getName());
+//
+//            System.out.println(userService.getName(123));
 
 //            Order order = orderService.findById(2);
 //            // 测试异常

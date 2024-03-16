@@ -45,7 +45,8 @@ public class ProviderBootstrap implements ApplicationContextAware {
             rpcResponse.setData(result);
             return rpcResponse;
         } catch (Exception e) {
-            rpcResponse.setEx(new RuntimeException(e.getCause().getMessage()));
+            String message = e.getCause() != null ? e.getCause().getMessage() : e.getMessage();
+            rpcResponse.setEx(new RuntimeException(message));
         }
         return rpcResponse;
     }
