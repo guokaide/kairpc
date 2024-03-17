@@ -8,20 +8,22 @@
 
 引入 SpringBoot 依赖：
 
-```java
-<parent>
-<groupId>org.springframework.boot</groupId>
-<artifactId>spring-boot-starter-parent</artifactId>
-<version>3.2.3</version>
-<relativePath/><!--lookup parent from repository-->
-</parent>
+```xml
 
-<dependencies>
+<parent>
+    <groupId>org.springframework.boot</groupId>
+    <artifactId>spring-boot-starter-parent</artifactId>
+    <version>3.2.3</version>
+    <relativePath/><!--lookup parent from repository-->
+</parent>
+```
+
+```xml
+
 <dependency>
-<groupId>org.springframework.boot</groupId>
-<artifactId>spring-boot-starter-web</artifactId>
+    <groupId>org.springframework.boot</groupId>
+    <artifactId>spring-boot-starter-web</artifactId>
 </dependency>
-</dependencies>
 ```
 
 引入 RPC 依赖：
@@ -229,7 +231,7 @@ Filter
 和 [ConsumerConfig.java](kairpc-core%2Fsrc%2Fmain%2Fjava%2Fcom%2Fkai%2Fkairpc%2Fcore%2Fconsumer%2FConsumerConfig.java)
 可以配置选择什么注册中心。
 
-[ProviderBootstrap.java](kairpc-core%2Fsrc%2Fmain%2Fjava%2Fcom%2Fkai%2Fkairpc%2Fcore%2Fprovider%2FProviderBootstrap.java) 
+[ProviderBootstrap.java](kairpc-core%2Fsrc%2Fmain%2Fjava%2Fcom%2Fkai%2Fkairpc%2Fcore%2Fprovider%2FProviderBootstrap.java)
 在启动的时候，通过 start() 方法将实例注册到注册中心，在停止的时候，通过 stop() 方法将实例从注册中心移除。
 
 [ConsumerBootstrap.java](kairpc-core%2Fsrc%2Fmain%2Fjava%2Fcom%2Fkai%2Fkairpc%2Fcore%2Fconsumer%2FConsumerBootstrap.java)
