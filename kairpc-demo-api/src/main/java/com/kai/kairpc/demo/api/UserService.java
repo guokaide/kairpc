@@ -8,12 +8,19 @@ public interface UserService {
 
     User findById(int id, String name);
 
-    // 返回基本类型
     int getId(int id);
 
     long getId(long id);
 
+    long getId(float id);
+
     long getId(User user);
+
+    int[] getIds();
+
+    long[] getLongIds();
+
+    int[] getIds(int[] ids);
 
     String getName();
 

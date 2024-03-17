@@ -1,5 +1,12 @@
 package com.kai.kairpc.core.util;
 
+import com.alibaba.fastjson.JSONObject;
+
+import java.lang.reflect.Array;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
 public class TypeUtils {
 
     public static Object cast(Object origin, Class<?> type) {
@@ -10,6 +17,25 @@ public class TypeUtils {
         if (type.isAssignableFrom(clazz)) {
             return origin;
         }
+
+        if (type.isArray()) {
+            if (origin instanceof List<?> list) {
+                origin = list.toArray();
+            }
+            int length = Array.getLength(origin);
+            Class<?> componentType = type.componentType();
+            Object resultArray = Array.newInstance(componentType, length);
+            for (int i = 0; i < length; i++) {
+                Array.set(resultArray, i, Array.get(origin, i));
+            }
+            return resultArray;
+        }
+
+        if (origin instanceof HashMap<?, ?> map) {
+            JSONObject jsonObject = new JSONObject((Map<String, Object>) map);
+            return jsonObject.toJavaObject(type);
+        }
+
         if (type.equals(Byte.class) || type.equals(Byte.TYPE)) {
             return Byte.valueOf(origin.toString());
         } else if (type.equals(Short.class) || type.equals(Short.TYPE)) {
@@ -25,6 +51,6 @@ public class TypeUtils {
         } else if (type.equals(Character.class) || type.equals(Character.TYPE)) {
             return origin.toString().charAt(0);
         }
-        return null;
+        throw new IllegalArgumentException("Unsupported type: " + type.getName() + ", value: " + origin);
     }
 }

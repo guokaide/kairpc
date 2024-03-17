@@ -37,13 +37,6 @@ public class ConsumerBootstrap implements ApplicationContextAware, EnvironmentAw
         context.setRouter(router);
         context.setLoadBalancer(loadBalancer);
 
-//        String urls = environment.getProperty("kairpc.providers", "");
-//        if (Strings.isEmpty(urls)) {
-//            System.err.println("kairpc.providers is empty.");
-//        }
-//
-//        List<String> providers = Arrays.stream(urls.split(",")).toList();
-
         String[] names = applicationContext.getBeanDefinitionNames();
         for (String name : names) {
             Object bean = applicationContext.getBean(name);
@@ -55,7 +48,6 @@ public class ConsumerBootstrap implements ApplicationContextAware, EnvironmentAw
                     Object consumer = stub.get(serviceName);
                     if (consumer == null) {
                         consumer = createFromRegistry(service, context, rc);
-//                        consumer = createConsumer(service, context, providers);
                         this.stub.put(serviceName, consumer);
                     }
                     f.setAccessible(true);

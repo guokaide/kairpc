@@ -5,6 +5,7 @@ import com.kai.kairpc.core.api.RpcRequest;
 import com.kai.kairpc.core.api.RpcResponse;
 import com.kai.kairpc.core.meta.ProviderMeta;
 import com.kai.kairpc.core.util.MethodUtils;
+import com.kai.kairpc.core.util.TypeUtils;
 import jakarta.annotation.PostConstruct;
 import lombok.Data;
 import org.springframework.context.ApplicationContext;
@@ -13,6 +14,7 @@ import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 
 import java.lang.reflect.Method;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -40,7 +42,8 @@ public class ProviderBootstrap implements ApplicationContextAware {
         try {
             ProviderMeta meta = findProviderMeta(providerMetas, request.getMethodSign());
             Method method = meta.getMethod();
-            Object result = method.invoke(meta.getServiceImpl(), request.getArgs());
+            Object[] args = processArgs(request.getArgs(), method.getParameterTypes());
+            Object result = method.invoke(meta.getServiceImpl(), args);
             rpcResponse.setStatus(true);
             rpcResponse.setData(result);
             return rpcResponse;
@@ -49,6 +52,17 @@ public class ProviderBootstrap implements ApplicationContextAware {
             rpcResponse.setEx(new RuntimeException(message));
         }
         return rpcResponse;
+    }
+
+    private Object[] processArgs(Object[] args, Class<?>[] parameterTypes) {
+        if (args == null || args.length == 0) {
+            return args;
+        }
+        Object[] actualArgs = new Object[args.length];
+        for (int i = 0; i < args.length; i++) {
+            actualArgs[i] = TypeUtils.cast(args[i], parameterTypes[i]);
+        }
+        return actualArgs;
     }
 
     private ProviderMeta findProviderMeta(List<ProviderMeta> providerMetas, String methodSign) {
@@ -61,14 +75,15 @@ public class ProviderBootstrap implements ApplicationContextAware {
     // 1. 服务提供方提供的方法是有限的，即使全部缓存起来也没有问题
     // 2. 如果没有缓存，服务消费方每天调用，都需要计算方法签名的话，会影响性能
     private void registerProvider(Object object) {
-        Class<?> anInterface = object.getClass().getInterfaces()[0];
-        Method[] methods = anInterface.getMethods();
-        for (Method method : methods) {
-            if (MethodUtils.checkLocalMethod(method)) {
-                continue;
+        Arrays.stream(object.getClass().getInterfaces()).forEach(x -> {
+            Method[] methods = x.getMethods();
+            for (Method method : methods) {
+                if (MethodUtils.checkLocalMethod(method)) {
+                    continue;
+                }
+                createProvider(x, object, method);
             }
-            createProvider(anInterface, object, method);
-        }
+        });
     }
 
     private void createProvider(Class<?> anInterface, Object object, Method method) {
