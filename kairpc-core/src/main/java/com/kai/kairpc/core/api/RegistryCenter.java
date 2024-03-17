@@ -1,11 +1,18 @@
 package com.kai.kairpc.core.api;
 
+import com.kai.kairpc.core.registry.ChangedListener;
+
 import java.util.List;
 
+/**
+ * 注册中心
+ */
 public interface RegistryCenter {
 
+    // provider & consumer
     void start();
 
+    // provider & consumer
     void stop();
 
     // provider
@@ -16,7 +23,7 @@ public interface RegistryCenter {
     // consumer
     List<String> fetchAll(String service);
 
-    // void subscribe();
+    void subscribe(String service, ChangedListener listener);
 
     class StaticRegistryCenter implements RegistryCenter {
 
@@ -45,6 +52,10 @@ public interface RegistryCenter {
         @Override
         public List<String> fetchAll(String service) {
             return providers;
+        }
+
+        @Override
+        public void subscribe(String service, ChangedListener listener) {
         }
     }
 }

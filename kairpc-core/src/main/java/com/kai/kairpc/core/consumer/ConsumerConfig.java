@@ -4,6 +4,7 @@ import com.kai.kairpc.core.api.LoadBalancer;
 import com.kai.kairpc.core.api.RegistryCenter;
 import com.kai.kairpc.core.api.Router;
 import com.kai.kairpc.core.cluster.RoundRobinBalancer;
+import com.kai.kairpc.core.registry.ZkRegistryCenter;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.ApplicationRunner;
 import org.springframework.context.annotation.Bean;
@@ -47,6 +48,6 @@ public class ConsumerConfig {
 
     @Bean(initMethod = "start", destroyMethod = "stop")
     public RegistryCenter consumerRegisterCenter() {
-        return new RegistryCenter.StaticRegistryCenter(List.of(servers.split(",")));
+        return new ZkRegistryCenter();
     }
 }

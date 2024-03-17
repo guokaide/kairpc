@@ -76,9 +76,11 @@ public class KaiInvocationHandler implements InvocationHandler {
                 .post(RequestBody.create(requestJson, JSON_TYPE))
                 .build();
         try {
-            String responseJson = client.newCall(request).execute().body().string();
-            System.out.println("responseJson ===> " + responseJson);
-            return JSON.parseObject(responseJson, RpcResponse.class);
+            try (Response response = client.newCall(request).execute()) {
+                String responseJson = response.body().string();
+                System.out.println("responseJson ===> " + responseJson);
+                return JSON.parseObject(responseJson, RpcResponse.class);
+            }
         } catch (IOException e) {
             e.printStackTrace();
             throw new RuntimeException(e);
