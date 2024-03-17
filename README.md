@@ -39,7 +39,7 @@
 
 ### 服务提供者
 
-通过 `@KaiProvider` 注解提供服务。
+通过 `@KaiProvider` 注解提供服务。示例：[kairpc-demo-provider](kairpc-demo-provider)。
 
 要想提供用户服务：
 
@@ -88,6 +88,9 @@ import com.kai.kairpc.core.provider.ProviderBootstrap;
 @RestController
 public class ProviderController {
 
+    @Autowired
+    ProviderBootstrap providerBootstrap;
+
     @RequestMapping("/")
     public RpcResponse invoke(@RequestBody RpcRequest request) {
         return providerBootstrap.invoke(request);
@@ -98,7 +101,7 @@ public class ProviderController {
 
 ### 服务消费者
 
-通过 `@KaiConsumer` 将服务引入到 Bean 中。
+通过 `@KaiConsumer` 将服务引入到 Bean 中。示例：[kairpc-demo-consumer](kairpc-demo-consumer)。
 
 第一步：要想引入用户服务，可以在 Bean 的属性上标记 `@KaiConsumer`, 即可像调用本地方法一样，调用用户服务。
 
@@ -182,8 +185,8 @@ public class ConsumerApplication {
     - 获取所有 Bean 中标记 `@KaiConsumer` 的属性
 2. 初始化 `@KaiConsumer` 标记的属性
 
-- 创建这些属性的代理类，并且赋值给这些属性
-- 将这些代理类缓存在 stub 中
+    - 创建这些属性的代理类，并且赋值给这些属性
+    - 将这些代理类缓存在 stub 中
 
 3. `ConsumerConfig` 类创建 `ConsumerBootstrap`, 并通过 `ApplicationRunner` 的方式初始化 `ConsumerBootstrap`
 
