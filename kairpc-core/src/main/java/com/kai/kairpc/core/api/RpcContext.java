@@ -1,5 +1,6 @@
 package com.kai.kairpc.core.api;
 
+import com.kai.kairpc.core.meta.InstanceMeta;
 import lombok.Data;
 
 import java.util.List;
@@ -8,6 +9,6 @@ import java.util.List;
 public class RpcContext {
 
     List<Filter> filters;
-    Router router;
-    LoadBalancer loadBalancer;
+    Router<InstanceMeta> router;
+    LoadBalancer<InstanceMeta> loadBalancer;
 }

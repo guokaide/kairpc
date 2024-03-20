@@ -5,6 +5,7 @@ import com.kai.kairpc.core.api.RpcContext;
 import com.kai.kairpc.core.api.RpcRequest;
 import com.kai.kairpc.core.api.RpcResponse;
 import com.kai.kairpc.core.consumer.http.OkHttpInvoker;
+import com.kai.kairpc.core.meta.InstanceMeta;
 import com.kai.kairpc.core.util.MethodUtils;
 import com.kai.kairpc.core.util.TypeUtils;
 import org.jetbrains.annotations.Nullable;
@@ -22,11 +23,11 @@ public class KaiInvocationHandler implements InvocationHandler {
 
     RpcContext context;
 
-    List<String> providers;
+    List<InstanceMeta> providers;
 
     HttpInvoker httpInvoker = new OkHttpInvoker();
 
-    public KaiInvocationHandler(Class<?> clazz, RpcContext context, List<String> providers) {
+    public KaiInvocationHandler(Class<?> clazz, RpcContext context, List<InstanceMeta> providers) {
         this.service = clazz;
         this.context = context;
         this.providers = providers;
@@ -43,11 +44,11 @@ public class KaiInvocationHandler implements InvocationHandler {
         rpcRequest.setMethodSign(MethodUtils.methodSign(method));
         rpcRequest.setArgs(args);
 
-        List<String> urls = context.getRouter().choose(providers);
-        String url = (String) context.getLoadBalancer().choose(urls);
-        System.out.println("loadBalancer.choose(urls) ===> " + url);
+        List<InstanceMeta> instances = context.getRouter().choose(providers);
+        InstanceMeta instance = context.getLoadBalancer().choose(instances);
+        System.out.println("loadBalancer.choose(urls) ===> " + instance);
 
-        RpcResponse<?> rpcResponse = httpInvoker.post(rpcRequest, url);
+        RpcResponse<?> rpcResponse = httpInvoker.post(rpcRequest, instance.toUrl());
 
         if (rpcResponse.isStatus()) {
             Object result = rpcResponse.getData();

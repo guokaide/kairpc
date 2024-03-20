@@ -2,6 +2,7 @@ package com.kai.kairpc.core.provider;
 
 import com.kai.kairpc.core.annotation.KaiProvider;
 import com.kai.kairpc.core.api.RegistryCenter;
+import com.kai.kairpc.core.meta.InstanceMeta;
 import com.kai.kairpc.core.meta.ProviderMeta;
 import com.kai.kairpc.core.util.MethodUtils;
 import jakarta.annotation.PostConstruct;
@@ -33,7 +34,7 @@ public class ProviderBootstrap implements ApplicationContextAware {
     // <InterfaceName, List<ProviderMeta>>
     private MultiValueMap<String, ProviderMeta> skeleton = new LinkedMultiValueMap<>();
 
-    private String instance;
+    private InstanceMeta instance;
 
     @Value("${server.port}")
     private String port;
@@ -60,7 +61,7 @@ public class ProviderBootstrap implements ApplicationContextAware {
     @SneakyThrows
     public void start() {
         String ip = InetAddress.getLocalHost().getHostAddress();
-        this.instance = ip + "_" + port;
+        this.instance = InstanceMeta.http(ip, Integer.valueOf(port));
 
         rc.start();
         // 服务注册：将提供的服务注册到注册中心
