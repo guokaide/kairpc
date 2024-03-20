@@ -5,6 +5,7 @@ import com.kai.kairpc.core.api.LoadBalancer;
 import com.kai.kairpc.core.api.RegistryCenter;
 import com.kai.kairpc.core.api.Router;
 import com.kai.kairpc.core.api.RpcContext;
+import com.kai.kairpc.core.util.MethodUtils;
 import lombok.Data;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
@@ -13,7 +14,6 @@ import org.springframework.core.env.Environment;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Proxy;
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -41,7 +41,7 @@ public class ConsumerBootstrap implements ApplicationContextAware, EnvironmentAw
         String[] names = applicationContext.getBeanDefinitionNames();
         for (String name : names) {
             Object bean = applicationContext.getBean(name);
-            List<Field> fields = findAnnotatedField(bean.getClass());
+            List<Field> fields = MethodUtils.findAnnotatedField(bean.getClass(), KaiConsumer.class);
             fields.forEach(f -> {
                 try {
                     Class<?> service = f.getType();
@@ -84,21 +84,5 @@ public class ConsumerBootstrap implements ApplicationContextAware, EnvironmentAw
         );
     }
 
-    private List<Field> findAnnotatedField(Class<?> clazz) {
-        List<Field> result = new ArrayList<>();
-        while (clazz != null) {
-            Field[] fields = clazz.getDeclaredFields();
-            for (Field f : fields) {
-                if (f.isAnnotationPresent(KaiConsumer.class)) {
-                    result.add(f);
-                }
-            }
-            // Spring 中的 Bean 的类及其中包含的属性都可能是代理过的，如：
-            // com.kai.kairpc.demo.consumer.KairpcDemoConsumerApplication$$SpringCGLIB$$0@6993c8df
-            // 所以，我们还需要扫描其父类
-            clazz = clazz.getSuperclass();
-        }
-        return result;
-    }
 
 }

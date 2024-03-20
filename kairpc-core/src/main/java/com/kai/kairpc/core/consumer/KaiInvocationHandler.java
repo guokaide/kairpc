@@ -8,6 +8,7 @@ import com.kai.kairpc.core.api.RpcResponse;
 import com.kai.kairpc.core.util.MethodUtils;
 import com.kai.kairpc.core.util.TypeUtils;
 import okhttp3.*;
+import org.jetbrains.annotations.Nullable;
 
 import java.io.IOException;
 import java.lang.reflect.InvocationHandler;
@@ -46,18 +47,22 @@ public class KaiInvocationHandler implements InvocationHandler {
         String url = (String) context.getLoadBalancer().choose(urls);
         System.out.println("loadBalancer.choose(urls) ===> " + url);
 
-        RpcResponse rpcResponse = post(rpcRequest, url);
+        RpcResponse<Object> rpcResponse = post(rpcRequest, url);
 
         if (rpcResponse.isStatus()) {
             Object result = rpcResponse.getData();
-            if (result instanceof JSONObject) {
-                JSONObject jsonResult = (JSONObject) rpcResponse.getData();
-                return jsonResult.toJavaObject(method.getReturnType());
-            } else {
-                return TypeUtils.cast(result, method.getReturnType());
-            }
+            return castMethodResult(method, result);
         } else {
             throw new RuntimeException(rpcResponse.getEx());
+        }
+    }
+
+    @Nullable
+    private static Object castMethodResult(Method method, Object result) {
+        if (result instanceof JSONObject jsonResult) {
+            return jsonResult.toJavaObject(method.getReturnType());
+        } else {
+            return TypeUtils.cast(result, method.getReturnType());
         }
     }
 
@@ -68,7 +73,7 @@ public class KaiInvocationHandler implements InvocationHandler {
             .connectTimeout(1, TimeUnit.SECONDS)
             .build();
 
-    private RpcResponse post(RpcRequest rpcRequest, String url) {
+    private RpcResponse<Object> post(RpcRequest rpcRequest, String url) {
         String requestJson = JSON.toJSONString(rpcRequest);
         System.out.println("requestJson ===> " + requestJson);
         Request request = new Request.Builder()
