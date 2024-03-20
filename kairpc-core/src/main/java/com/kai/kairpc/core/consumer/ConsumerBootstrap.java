@@ -19,6 +19,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+/**
+ * 服务消费者启动类
+ */
 @Data
 public class ConsumerBootstrap implements ApplicationContextAware, EnvironmentAware {
 

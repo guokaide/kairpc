@@ -1,30 +1,30 @@
 package com.kai.kairpc.core.consumer;
 
-import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import com.kai.kairpc.core.api.RpcContext;
 import com.kai.kairpc.core.api.RpcRequest;
 import com.kai.kairpc.core.api.RpcResponse;
+import com.kai.kairpc.core.consumer.http.OkHttpInvoker;
 import com.kai.kairpc.core.util.MethodUtils;
 import com.kai.kairpc.core.util.TypeUtils;
-import okhttp3.*;
 import org.jetbrains.annotations.Nullable;
 
-import java.io.IOException;
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
 import java.util.List;
-import java.util.concurrent.TimeUnit;
 
+/**
+ * 服务消费者动态代理处理类
+ */
 public class KaiInvocationHandler implements InvocationHandler {
-
-    final static MediaType JSON_TYPE = MediaType.get("application/json; charset=utf-8");
 
     Class<?> service;
 
     RpcContext context;
 
     List<String> providers;
+
+    HttpInvoker httpInvoker = new OkHttpInvoker();
 
     public KaiInvocationHandler(Class<?> clazz, RpcContext context, List<String> providers) {
         this.service = clazz;
@@ -47,7 +47,7 @@ public class KaiInvocationHandler implements InvocationHandler {
         String url = (String) context.getLoadBalancer().choose(urls);
         System.out.println("loadBalancer.choose(urls) ===> " + url);
 
-        RpcResponse<Object> rpcResponse = post(rpcRequest, url);
+        RpcResponse<?> rpcResponse = httpInvoker.post(rpcRequest, url);
 
         if (rpcResponse.isStatus()) {
             Object result = rpcResponse.getData();
@@ -66,29 +66,4 @@ public class KaiInvocationHandler implements InvocationHandler {
         }
     }
 
-    OkHttpClient client = new OkHttpClient.Builder()
-            .connectionPool(new ConnectionPool(16, 60, TimeUnit.SECONDS))
-            .readTimeout(1, TimeUnit.SECONDS)
-            .writeTimeout(1, TimeUnit.SECONDS)
-            .connectTimeout(1, TimeUnit.SECONDS)
-            .build();
-
-    private RpcResponse<Object> post(RpcRequest rpcRequest, String url) {
-        String requestJson = JSON.toJSONString(rpcRequest);
-        System.out.println("requestJson ===> " + requestJson);
-        Request request = new Request.Builder()
-                .url(url)
-                .post(RequestBody.create(requestJson, JSON_TYPE))
-                .build();
-        try {
-            try (Response response = client.newCall(request).execute()) {
-                String responseJson = response.body().string();
-                System.out.println("responseJson ===> " + responseJson);
-                return JSON.parseObject(responseJson, RpcResponse.class);
-            }
-        } catch (IOException e) {
-            e.printStackTrace();
-            throw new RuntimeException(e);
-        }
-    }
 }
