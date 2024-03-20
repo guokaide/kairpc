@@ -2,6 +2,7 @@ package com.kai.kairpc.core.registry;
 
 import com.kai.kairpc.core.api.RegistryCenter;
 import com.kai.kairpc.core.meta.InstanceMeta;
+import com.kai.kairpc.core.meta.ServiceMeta;
 import lombok.SneakyThrows;
 import org.apache.curator.RetryPolicy;
 import org.apache.curator.framework.CuratorFramework;
@@ -37,7 +38,7 @@ public class ZkRegistryCenter implements RegistryCenter {
     }
 
     @Override
-    public void register(String service, InstanceMeta instance) {
+    public void register(ServiceMeta service, InstanceMeta instance) {
         String servicePath = "/" + service;
         try {
             // 创建服务的持久化节点
@@ -54,7 +55,7 @@ public class ZkRegistryCenter implements RegistryCenter {
     }
 
     @Override
-    public void unregister(String service, InstanceMeta instance) {
+    public void unregister(ServiceMeta service, InstanceMeta instance) {
         String servicePath = "/" + service;
         try {
             // 判断服务是否存在
@@ -71,7 +72,7 @@ public class ZkRegistryCenter implements RegistryCenter {
     }
 
     @Override
-    public List<InstanceMeta> fetchAll(String service) {
+    public List<InstanceMeta> fetchAll(ServiceMeta service) {
         String servicePath = "/" + service;
         try {
             // 获取所有子节点
@@ -93,8 +94,8 @@ public class ZkRegistryCenter implements RegistryCenter {
 
     @SneakyThrows
     @Override
-    public void subscribe(String service, ChangedListener listener) {
-        final TreeCache cache = TreeCache.newBuilder(client, "/" + service)
+    public void subscribe(ServiceMeta service, ChangedListener listener) {
+        final TreeCache cache = TreeCache.newBuilder(client, "/" + service.toPath())
                 .setCacheData(true)
                 .setMaxDepth(2)
                 .build();

@@ -4,6 +4,7 @@ import com.kai.kairpc.core.annotation.KaiProvider;
 import com.kai.kairpc.core.api.RegistryCenter;
 import com.kai.kairpc.core.meta.InstanceMeta;
 import com.kai.kairpc.core.meta.ProviderMeta;
+import com.kai.kairpc.core.meta.ServiceMeta;
 import com.kai.kairpc.core.util.MethodUtils;
 import jakarta.annotation.PostConstruct;
 import jakarta.annotation.PreDestroy;
@@ -38,6 +39,15 @@ public class ProviderBootstrap implements ApplicationContextAware {
 
     @Value("${server.port}")
     private String port;
+
+    @Value("${app.id}")
+    private String app;
+
+    @Value("${app.namespace}")
+    private String namespace;
+
+    @Value("${app.env}")
+    private String env;
 
     @PostConstruct // init-method，此时所有的 Bean 对象都已经创建好了（new 出来了），但是有可能没有初始化完成
     public void init() {
@@ -75,11 +85,13 @@ public class ProviderBootstrap implements ApplicationContextAware {
     }
 
     private void unregisterService(String service) {
-        rc.unregister(service, instance);
+        ServiceMeta serviceMeta = ServiceMeta.builder().app(app).namespace(namespace).name(env).name(service).build();
+        rc.unregister(serviceMeta, instance);
     }
 
     private void registerService(String service) {
-        rc.register(service, instance);
+        ServiceMeta serviceMeta = ServiceMeta.builder().app(app).namespace(namespace).name(env).name(service).build();
+        rc.register(serviceMeta, instance);
     }
 
     // 可以将服务提供方提供的实现类的方法签名全部都缓存起来，原因是：

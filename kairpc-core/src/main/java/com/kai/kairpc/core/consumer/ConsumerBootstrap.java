@@ -6,8 +6,10 @@ import com.kai.kairpc.core.api.RegistryCenter;
 import com.kai.kairpc.core.api.Router;
 import com.kai.kairpc.core.api.RpcContext;
 import com.kai.kairpc.core.meta.InstanceMeta;
+import com.kai.kairpc.core.meta.ServiceMeta;
 import com.kai.kairpc.core.util.MethodUtils;
 import lombok.Data;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
 import org.springframework.context.EnvironmentAware;
@@ -26,7 +28,17 @@ import java.util.Map;
 public class ConsumerBootstrap implements ApplicationContextAware, EnvironmentAware {
 
     ApplicationContext applicationContext;
+
     Environment environment;
+
+    @Value("${app.id}")
+    private String app;
+
+    @Value("${app.namespace}")
+    private String namespace;
+
+    @Value("${app.env}")
+    private String env;
 
     private Map<String, Object> stub = new HashMap<>();
 
@@ -65,10 +77,12 @@ public class ConsumerBootstrap implements ApplicationContextAware, EnvironmentAw
 
     private Object createFromRegistry(Class<?> service, RpcContext context, RegistryCenter rc) {
         String serviceName = service.getCanonicalName();
-        List<InstanceMeta> providers = rc.fetchAll(serviceName);
+        ServiceMeta serviceMeta = ServiceMeta.builder().app(app).namespace(namespace).name(env).name(serviceName).build();
+
+        List<InstanceMeta> providers = rc.fetchAll(serviceMeta);
         System.out.println(" ===> map to providers: " + providers);
 
-        rc.subscribe(serviceName, event -> {
+        rc.subscribe(serviceMeta, event -> {
             providers.clear();
             providers.addAll(event.getData());
         });
