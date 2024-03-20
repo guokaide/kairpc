@@ -86,41 +86,6 @@ public class ProviderBootstrap implements ApplicationContextAware {
         rc.register(service, instance);
     }
 
-    public RpcResponse invoke(RpcRequest request) {
-        RpcResponse rpcResponse = new RpcResponse();
-        List<ProviderMeta> providerMetas = skeleton.get(request.getService());
-        try {
-            ProviderMeta meta = findProviderMeta(providerMetas, request.getMethodSign());
-            Method method = meta.getMethod();
-            Object[] args = processArgs(request.getArgs(), method.getParameterTypes());
-            Object result = method.invoke(meta.getServiceImpl(), args);
-            rpcResponse.setStatus(true);
-            rpcResponse.setData(result);
-            return rpcResponse;
-        } catch (Exception e) {
-            String message = e.getCause() != null ? e.getCause().getMessage() : e.getMessage();
-            rpcResponse.setEx(new RuntimeException(message));
-        }
-        return rpcResponse;
-    }
-
-    private Object[] processArgs(Object[] args, Class<?>[] parameterTypes) {
-        if (args == null || args.length == 0) {
-            return args;
-        }
-        Object[] actualArgs = new Object[args.length];
-        for (int i = 0; i < args.length; i++) {
-            actualArgs[i] = TypeUtils.cast(args[i], parameterTypes[i]);
-        }
-        return actualArgs;
-    }
-
-    private ProviderMeta findProviderMeta(List<ProviderMeta> providerMetas, String methodSign) {
-        Optional<ProviderMeta> optional = providerMetas.stream()
-                .filter(x -> x.getMethodSign().equals(methodSign)).findFirst();
-        return optional.orElse(null);
-    }
-
     // 可以将服务提供方提供的实现类的方法签名全部都缓存起来，原因是：
     // 1. 服务提供方提供的方法是有限的，即使全部缓存起来也没有问题
     // 2. 如果没有缓存，服务消费方每次调用，都需要计算方法签名的话，会影响性能

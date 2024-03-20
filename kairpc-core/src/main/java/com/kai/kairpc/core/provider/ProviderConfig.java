@@ -2,6 +2,7 @@ package com.kai.kairpc.core.provider;
 
 import com.kai.kairpc.core.api.RegistryCenter;
 import com.kai.kairpc.core.registry.ZkRegistryCenter;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.ApplicationRunner;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -16,13 +17,18 @@ public class ProviderConfig {
     }
 
     @Bean
+    ProviderInvoker providerInvoker(@Autowired ProviderBootstrap providerBootstrap) {
+        return new ProviderInvoker(providerBootstrap);
+    }
+
+    @Bean
     public RegistryCenter providerRegisterCenter() {
         return new ZkRegistryCenter();
     }
 
     @Bean
     @Order(Integer.MIN_VALUE)
-    public ApplicationRunner providerBootstrapRunner(ProviderBootstrap providerBootstrap) {
+    public ApplicationRunner providerBootstrapRunner(@Autowired ProviderBootstrap providerBootstrap) {
         return x -> {
             System.out.println("providerBootstrapRunner start ...");
             providerBootstrap.start();
