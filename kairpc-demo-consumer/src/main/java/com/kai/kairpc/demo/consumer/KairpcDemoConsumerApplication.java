@@ -2,7 +2,6 @@ package com.kai.kairpc.demo.consumer;
 
 import com.kai.kairpc.core.annotation.KaiConsumer;
 import com.kai.kairpc.core.consumer.ConsumerConfig;
-import com.kai.kairpc.demo.api.Order;
 import com.kai.kairpc.demo.api.OrderService;
 import com.kai.kairpc.demo.api.User;
 import com.kai.kairpc.demo.api.UserService;
@@ -44,25 +43,33 @@ public class KairpcDemoConsumerApplication {
     public ApplicationRunner applicationRunner() {
         return x -> {
             // case: int -> User
+            System.out.println("case 1: ==> [常规 int 类型，返回 User 对象]");
             User user = userService.findById(1);
             System.out.println("userService.findById(1) = " + user);
 
             // case: override
+            System.out.println("case 2: ==> [测试方法重载，同名方法，参数不同]");
             User userKai = userService.findById(1, "kai");
             System.out.println("userService.findById(1, \"kai\") = " + userKai);
 
             // case: void -> String
-            System.out.println(userService.getName());
+            System.out.println("case 3: ==> [测试返回字符串]");
+            System.out.println("userService.getName() = " + userService.getName());
 
             // case: override
-            System.out.println(userService.getName(123));
+            System.out.println("case 4: ==> [测试重载方法返回字符串]");
+            System.out.println("userService.getName(123) = " + userService.getName(123));
 
+            // case: local toString()
+            System.out.println("case 5: ==> [测试 local toString() 方法]");
+            System.out.println("userService.toString() = " + userService.toString());
 
             // case: 输入基本类型
-            System.out.println(userService.getId(100));
+            System.out.println("case 6: ==> [常规 int 类型，返回 User 对象]");
+            System.out.println(userService.getId(10));
 
-            System.out.println(userService.getId(100L));
-
+            System.out.println("case 7: ==> [测试 long+float 类型]");
+            System.out.println("userService.getId(100L) = " + userService.getId(10L));
             System.out.println("userService.getId(10f) = " + userService.getId(10f));
 
             // case: 输入对象（User: fastjson 会将其转换为 LinkedHashMap）

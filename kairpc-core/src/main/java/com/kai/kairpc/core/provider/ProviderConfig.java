@@ -15,7 +15,7 @@ public class ProviderConfig {
         return new ProviderBootstrap();
     }
 
-    @Bean(initMethod = "start", destroyMethod = "stop")
+    @Bean
     public RegistryCenter providerRegisterCenter() {
         return new ZkRegistryCenter();
     }

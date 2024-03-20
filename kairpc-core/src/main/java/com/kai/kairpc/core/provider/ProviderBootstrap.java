@@ -33,6 +33,8 @@ public class ProviderBootstrap implements ApplicationContextAware {
 
     ApplicationContext applicationContext;
 
+    RegistryCenter rc;
+
     // <InterfaceName, List<ProviderMeta>>
     private MultiValueMap<String, ProviderMeta> skeleton = new LinkedMultiValueMap<>();
 
@@ -43,6 +45,7 @@ public class ProviderBootstrap implements ApplicationContextAware {
 
     @PostConstruct // init-method，此时所有的 Bean 对象都已经创建好了（new 出来了），但是有可能没有初始化完成
     public void init() {
+        rc = applicationContext.getBean(RegistryCenter.class);
         // <beanName, 接口实现类>
         Map<String, Object> providers = applicationContext.getBeansWithAnnotation(KaiProvider.class);
         providers.forEach((k, v) -> System.out.println(k));
@@ -64,6 +67,7 @@ public class ProviderBootstrap implements ApplicationContextAware {
         String ip = InetAddress.getLocalHost().getHostAddress();
         this.instance = ip + "_" + port;
 
+        rc.start();
         // 服务注册：将提供的服务注册到注册中心
         skeleton.keySet().forEach(this::registerService);
     }
@@ -71,15 +75,14 @@ public class ProviderBootstrap implements ApplicationContextAware {
     @PreDestroy
     public void stop() {
         skeleton.keySet().forEach(this::unregisterService);
+        rc.stop();
     }
 
     private void unregisterService(String service) {
-        RegistryCenter rc = applicationContext.getBean(RegistryCenter.class);
         rc.unregister(service, instance);
     }
 
     private void registerService(String service) {
-        RegistryCenter rc = applicationContext.getBean(RegistryCenter.class);
         rc.register(service, instance);
     }
 
