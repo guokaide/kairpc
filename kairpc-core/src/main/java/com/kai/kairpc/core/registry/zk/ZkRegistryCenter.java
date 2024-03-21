@@ -1,8 +1,10 @@
-package com.kai.kairpc.core.registry;
+package com.kai.kairpc.core.registry.zk;
 
 import com.kai.kairpc.core.api.RegistryCenter;
 import com.kai.kairpc.core.meta.InstanceMeta;
 import com.kai.kairpc.core.meta.ServiceMeta;
+import com.kai.kairpc.core.registry.ChangedListener;
+import com.kai.kairpc.core.registry.Event;
 import lombok.SneakyThrows;
 import org.apache.curator.RetryPolicy;
 import org.apache.curator.framework.CuratorFramework;
@@ -11,35 +13,48 @@ import org.apache.curator.framework.recipes.cache.TreeCache;
 import org.apache.curator.retry.ExponentialBackoffRetry;
 import org.apache.zookeeper.CreateMode;
 import org.jetbrains.annotations.NotNull;
+import org.springframework.beans.factory.annotation.Value;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 public class ZkRegistryCenter implements RegistryCenter {
 
     private CuratorFramework client = null;
+    private final Map<ServiceMeta, TreeCache> treeCaches = new HashMap<>();
+
+    @Value("${kairpc.zkServer}")
+    private String server;
+
+    @Value("${kairpc.zkRoot}")
+    private String root;
+
 
     @Override
     public void start() {
         RetryPolicy retryPolicy = new ExponentialBackoffRetry(1000, 3);
         client = CuratorFrameworkFactory.builder()
-                .connectString("localhost:2181")
-                .namespace("kairpc")
+                .connectString(server)
+                .namespace(root)
                 .retryPolicy(retryPolicy)
                 .build();
-        System.out.println(" ===> zk client starting...");
+        System.out.println(" ===> zk client connect to " + server + "/" + root + " starting...");
         client.start();
     }
 
     @Override
     public void stop() {
+        treeCaches.values().forEach(TreeCache::close);
+        treeCaches.clear();
         System.out.println(" ===> zk client stop...");
         client.close();
     }
 
     @Override
     public void register(ServiceMeta service, InstanceMeta instance) {
-        String servicePath = "/" + service;
+        String servicePath = "/" + service.toPath();
         try {
             // 创建服务的持久化节点
             if (client.checkExists().forPath(servicePath) == null) {
@@ -56,7 +71,7 @@ public class ZkRegistryCenter implements RegistryCenter {
 
     @Override
     public void unregister(ServiceMeta service, InstanceMeta instance) {
-        String servicePath = "/" + service;
+        String servicePath = "/" + service.toPath();
         try {
             // 判断服务是否存在
             if (client.checkExists().forPath(servicePath) == null) {
@@ -73,7 +88,7 @@ public class ZkRegistryCenter implements RegistryCenter {
 
     @Override
     public List<InstanceMeta> fetchAll(ServiceMeta service) {
-        String servicePath = "/" + service;
+        String servicePath = "/" + service.toPath();
         try {
             // 获取所有子节点
             List<String> nodes = client.getChildren().forPath(servicePath);
@@ -95,11 +110,14 @@ public class ZkRegistryCenter implements RegistryCenter {
     @SneakyThrows
     @Override
     public void subscribe(ServiceMeta service, ChangedListener listener) {
-        final TreeCache cache = TreeCache.newBuilder(client, "/" + service.toPath())
+        if (treeCaches.containsKey(service)) {
+            return;
+        }
+        TreeCache treeCache = TreeCache.newBuilder(client, "/" + service.toPath())
                 .setCacheData(true)
                 .setMaxDepth(2)
                 .build();
-        cache.getListenable().addListener(
+        treeCache.getListenable().addListener(
                 (curatorFramework, treeCacheEvent) -> {
                     // service 有任何节点变动，这里都会执行
                     System.out.println(" ===> zk subscribe event: " + treeCacheEvent);
@@ -107,6 +125,9 @@ public class ZkRegistryCenter implements RegistryCenter {
                     listener.handle(new Event(nodes));
                 }
         );
-        cache.start();
+
+        treeCache.start();
+
+        treeCaches.put(service, treeCache);
     }
 }

@@ -15,4 +15,5 @@ public class ServiceMeta {
     public String toPath() {
         return String.format("%s_%s_%s_%s", app, namespace, env, name);
     }
+
 }

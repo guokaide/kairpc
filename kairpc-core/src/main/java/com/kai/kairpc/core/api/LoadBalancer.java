@@ -1,5 +1,7 @@
 package com.kai.kairpc.core.api;
 
+import com.kai.kairpc.core.meta.InstanceMeta;
+
 import java.util.List;
 
 /**
@@ -9,6 +11,7 @@ public interface LoadBalancer<T> {
 
     T choose(List<T> providers);
 
-    LoadBalancer DEFAULT = providers -> (providers == null || providers.size() == 0) ? null : providers.get(0);
+    LoadBalancer<InstanceMeta> DEFAULT = providers ->
+            (providers == null || providers.size() == 0) ? null : providers.get(0);
 
 }

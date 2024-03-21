@@ -77,7 +77,7 @@ public class ConsumerBootstrap implements ApplicationContextAware, EnvironmentAw
 
     private Object createFromRegistry(Class<?> service, RpcContext context, RegistryCenter rc) {
         String serviceName = service.getCanonicalName();
-        ServiceMeta serviceMeta = ServiceMeta.builder().app(app).namespace(namespace).name(env).name(serviceName).build();
+        ServiceMeta serviceMeta = ServiceMeta.builder().app(app).namespace(namespace).env(env).name(serviceName).build();
 
         List<InstanceMeta> providers = rc.fetchAll(serviceMeta);
         System.out.println(" ===> map to providers: " + providers);

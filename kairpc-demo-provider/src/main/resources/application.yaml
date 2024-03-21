@@ -1,6 +1,10 @@
 server:
   port: 8081
 
+kairpc:
+  zkServer: localhost:2181
+  zkRoot: kairpc
+
 app:
   id: app1
   namespace: public
