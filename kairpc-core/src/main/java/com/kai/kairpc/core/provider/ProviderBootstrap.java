@@ -10,6 +10,7 @@ import jakarta.annotation.PostConstruct;
 import jakarta.annotation.PreDestroy;
 import lombok.Data;
 import lombok.SneakyThrows;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
@@ -25,6 +26,7 @@ import java.util.Map;
  * 服务提供者启动类
  * implements ApplicationContextAware 是为了 Spring 启动的时候，set applicationContext
  */
+@Slf4j
 @Data
 public class ProviderBootstrap implements ApplicationContextAware {
 
@@ -54,7 +56,7 @@ public class ProviderBootstrap implements ApplicationContextAware {
         registryCenter = applicationContext.getBean(RegistryCenter.class);
         // <beanName, 接口实现类>
         Map<String, Object> providers = applicationContext.getBeansWithAnnotation(KaiProvider.class);
-        providers.forEach((k, v) -> System.out.println(k));
+        providers.forEach((k, v) -> log.info(k));
 
         // 本地注册：将提供的服务暴露出去
         providers.values().forEach(this::registerProvider);
@@ -109,7 +111,7 @@ public class ProviderBootstrap implements ApplicationContextAware {
     private void createProvider(Class<?> service, Object impl, Method method) {
         ProviderMeta providerMeta = ProviderMeta.builder()
                 .method(method).serviceImpl(impl).methodSign(MethodUtils.methodSign(method)).build();
-        System.out.println("create a provider: " + providerMeta);
+        log.info("create a provider: " + providerMeta);
         skeleton.add(service.getCanonicalName(), providerMeta);
     }
 

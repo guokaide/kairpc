@@ -8,6 +8,7 @@ import com.kai.kairpc.core.consumer.http.OkHttpInvoker;
 import com.kai.kairpc.core.meta.InstanceMeta;
 import com.kai.kairpc.core.util.MethodUtils;
 import com.kai.kairpc.core.util.TypeUtils;
+import lombok.extern.slf4j.Slf4j;
 import org.jetbrains.annotations.Nullable;
 
 import java.lang.reflect.InvocationHandler;
@@ -17,6 +18,7 @@ import java.util.List;
 /**
  * 服务消费者动态代理处理类
  */
+@Slf4j
 public class KaiInvocationHandler implements InvocationHandler {
 
     Class<?> service;
@@ -46,7 +48,7 @@ public class KaiInvocationHandler implements InvocationHandler {
 
         List<InstanceMeta> instances = context.getRouter().choose(providers);
         InstanceMeta instance = context.getLoadBalancer().choose(instances);
-        System.out.println("loadBalancer.choose(urls) ===> " + instance);
+        log.debug("loadBalancer.choose(urls) ===> " + instance);
 
         RpcResponse<?> rpcResponse = httpInvoker.post(rpcRequest, instance.toUrl());
 

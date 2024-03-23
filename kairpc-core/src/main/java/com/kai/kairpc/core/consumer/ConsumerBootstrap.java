@@ -9,6 +9,7 @@ import com.kai.kairpc.core.meta.InstanceMeta;
 import com.kai.kairpc.core.meta.ServiceMeta;
 import com.kai.kairpc.core.util.MethodUtils;
 import lombok.Data;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
@@ -24,6 +25,7 @@ import java.util.Map;
 /**
  * 服务消费者启动类
  */
+@Slf4j
 @Data
 public class ConsumerBootstrap implements ApplicationContextAware, EnvironmentAware {
 
@@ -80,7 +82,7 @@ public class ConsumerBootstrap implements ApplicationContextAware, EnvironmentAw
         ServiceMeta serviceMeta = ServiceMeta.builder().app(app).namespace(namespace).env(env).name(serviceName).build();
 
         List<InstanceMeta> providers = rc.fetchAll(serviceMeta);
-        System.out.println(" ===> map to providers: " + providers);
+        log.info(" ===> map to providers: " + providers);
 
         rc.subscribe(serviceMeta, event -> {
             providers.clear();

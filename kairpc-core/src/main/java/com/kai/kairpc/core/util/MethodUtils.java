@@ -1,5 +1,7 @@
 package com.kai.kairpc.core.util;
 
+import lombok.extern.slf4j.Slf4j;
+
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
@@ -7,6 +9,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
+@Slf4j
 public class MethodUtils {
 
     public static boolean checkLocalMethod(final String method) {
@@ -56,7 +59,7 @@ public class MethodUtils {
 
     public static void main(String[] args) {
         Arrays.stream(MethodUtils.class.getMethods()).forEach(m -> {
-            System.out.println(methodSign(m));
+            log.info(methodSign(m));
         });
     }
 }

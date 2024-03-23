@@ -6,6 +6,7 @@ import com.kai.kairpc.core.meta.ServiceMeta;
 import com.kai.kairpc.core.registry.ChangedListener;
 import com.kai.kairpc.core.registry.Event;
 import lombok.SneakyThrows;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.curator.RetryPolicy;
 import org.apache.curator.framework.CuratorFramework;
 import org.apache.curator.framework.CuratorFrameworkFactory;
@@ -20,6 +21,10 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+/**
+ * zk 注册中心
+ */
+@Slf4j
 public class ZkRegistryCenter implements RegistryCenter {
 
     private CuratorFramework client = null;
@@ -40,7 +45,7 @@ public class ZkRegistryCenter implements RegistryCenter {
                 .namespace(root)
                 .retryPolicy(retryPolicy)
                 .build();
-        System.out.println(" ===> zk client connect to " + server + "/" + root + " starting...");
+        log.info(" ===> zk client connect to " + server + "/" + root + " starting...");
         client.start();
     }
 
@@ -48,7 +53,7 @@ public class ZkRegistryCenter implements RegistryCenter {
     public void stop() {
         treeCaches.values().forEach(TreeCache::close);
         treeCaches.clear();
-        System.out.println(" ===> zk client stop...");
+        log.info(" ===> zk client stop...");
         client.close();
     }
 
@@ -62,7 +67,7 @@ public class ZkRegistryCenter implements RegistryCenter {
             }
             // 创建实例的临时节点
             String instancePath = servicePath + "/" + instance.toPath();
-            System.out.println(" ===> register to zk: " + instancePath);
+            log.info(" ===> register to zk: " + instancePath);
             client.create().withMode(CreateMode.EPHEMERAL).forPath(instancePath, "provider".getBytes());
         } catch (Exception e) {
             throw new RuntimeException(e);
@@ -79,7 +84,7 @@ public class ZkRegistryCenter implements RegistryCenter {
             }
             // 删除实例节点
             String instancePath = servicePath + "/" + instance.toPath();
-            System.out.println(" ===> unregister from zk: " + instancePath);
+            log.info(" ===> unregister from zk: " + instancePath);
             client.delete().quietly().forPath(instancePath);
         } catch (Exception e) {
             throw new RuntimeException(e);
@@ -92,7 +97,7 @@ public class ZkRegistryCenter implements RegistryCenter {
         try {
             // 获取所有子节点
             List<String> nodes = client.getChildren().forPath(servicePath);
-            System.out.println("===> fetchAll from zk: " + servicePath + ", nodes: " + nodes);
+            log.info("===> fetchAll from zk: " + servicePath + ", nodes: " + nodes);
             return mapInstances(nodes);
         } catch (Exception e) {
             throw new RuntimeException(e);
@@ -120,7 +125,7 @@ public class ZkRegistryCenter implements RegistryCenter {
         treeCache.getListenable().addListener(
                 (curatorFramework, treeCacheEvent) -> {
                     // service 有任何节点变动，这里都会执行
-                    System.out.println(" ===> zk subscribe event: " + treeCacheEvent);
+                    log.info(" ===> zk subscribe event: " + treeCacheEvent);
                     List<InstanceMeta> nodes = fetchAll(service);
                     listener.handle(new Event(nodes));
                 }
