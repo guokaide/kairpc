@@ -7,6 +7,9 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.core.env.Environment;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
+import java.util.Map;
+
 @Service
 @KaiProvider
 @RequiredArgsConstructor
@@ -69,5 +72,24 @@ public class UserServiceImpl implements UserService {
     @Override
     public String getName(int id) {
         return "Cola-" + id;
+    }
+
+    // java.lang.ClassCastException: class java.util.LinkedHashMap cannot be cast to class com.kai.kairpc.demo.api.User (java.util.LinkedHashMap is in module java.base of loader 'bootstrap'; com.kai.kairpc.demo.api.User is in unnamed module of loader 'app')
+    @Override
+    public List<User> getList(List<User> users) {
+//        return users.stream().peek(x -> {
+//            x.setName(x.getName() + "_" + System.currentTimeMillis());
+//        }).collect(Collectors.toList());
+        return users;
+    }
+
+    @Override
+    public Map<String, User> getMap(Map<String, User> userMap) {
+        return userMap;
+    }
+
+    @Override
+    public boolean getFlag(Boolean flag) {
+        return flag;
     }
 }

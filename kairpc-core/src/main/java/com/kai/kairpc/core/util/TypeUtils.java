@@ -13,8 +13,8 @@ public class TypeUtils {
         if (origin == null) {
             return null;
         }
-        Class<?> clazz = origin.getClass();
-        if (type.isAssignableFrom(clazz)) {
+
+        if (type.isAssignableFrom(origin.getClass())) {
             return origin;
         }
 
@@ -26,7 +26,12 @@ public class TypeUtils {
             Class<?> componentType = type.componentType();
             Object resultArray = Array.newInstance(componentType, length);
             for (int i = 0; i < length; i++) {
-                Array.set(resultArray, i, Array.get(origin, i));
+                if (componentType.isPrimitive() || componentType.getPackageName().startsWith("java")) {
+                    Array.set(resultArray, i, Array.get(origin, i));
+                } else {
+                    Object actual = cast(Array.get(origin, i), componentType);
+                    Array.set(resultArray, i, actual);
+                }
             }
             return resultArray;
         }
@@ -47,9 +52,11 @@ public class TypeUtils {
         } else if (type.equals(Float.class) || type.equals(Float.TYPE)) {
             return Float.valueOf(origin.toString());
         } else if (type.equals(Double.class) || type.equals(Double.TYPE)) {
-            return Integer.valueOf(origin.toString());
+            return Double.valueOf(origin.toString());
         } else if (type.equals(Character.class) || type.equals(Character.TYPE)) {
             return origin.toString().charAt(0);
+        } else if (type.equals(Boolean.class) || type.equals(Boolean.TYPE)) {
+            return origin;
         }
         throw new IllegalArgumentException("Unsupported type: " + type.getName() + ", value: " + origin);
     }

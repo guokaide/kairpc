@@ -98,15 +98,12 @@ public class ProviderBootstrap implements ApplicationContextAware {
     // 1. 服务提供方提供的方法是有限的，即使全部缓存起来也没有问题
     // 2. 如果没有缓存，服务消费方每次调用，都需要计算方法签名的话，会影响性能
     private void registerProvider(Object impl) {
-        Arrays.stream(impl.getClass().getInterfaces()).forEach(service -> {
-            Method[] methods = service.getMethods();
-            for (Method method : methods) {
-                if (MethodUtils.checkLocalMethod(method)) {
-                    continue;
-                }
-                createProvider(service, impl, method);
-            }
-        });
+        Arrays.stream(impl.getClass().getInterfaces()).forEach(
+                service -> {
+                    Arrays.stream(service.getMethods())
+                            .filter(method -> !MethodUtils.checkLocalMethod(method))
+                            .forEach(method -> createProvider(service, impl, method));
+                });
     }
 
     private void createProvider(Class<?> service, Object impl, Method method) {
