@@ -1,6 +1,7 @@
 package com.kai.kairpc.core.consumer;
 
 import com.alibaba.fastjson.JSONObject;
+import com.kai.kairpc.core.api.Filter;
 import com.kai.kairpc.core.api.RpcContext;
 import com.kai.kairpc.core.api.RpcRequest;
 import com.kai.kairpc.core.api.RpcResponse;
@@ -9,7 +10,6 @@ import com.kai.kairpc.core.meta.InstanceMeta;
 import com.kai.kairpc.core.util.MethodUtils;
 import com.kai.kairpc.core.util.TypeUtils;
 import lombok.extern.slf4j.Slf4j;
-import org.jetbrains.annotations.Nullable;
 
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
@@ -46,12 +46,33 @@ public class KaiInvocationHandler implements InvocationHandler {
         rpcRequest.setMethodSign(MethodUtils.methodSign(method));
         rpcRequest.setArgs(args);
 
+        for (Filter filter : this.context.getFilters()) {
+            Object preResult = filter.preFilter(rpcRequest);
+            if (preResult != null) {
+                log.debug(filter.getClass().getCanonicalName() + " ===> preFilter: " + preResult);
+                return preResult;
+            }
+        }
+
         List<InstanceMeta> instances = context.getRouter().choose(providers);
         InstanceMeta instance = context.getLoadBalancer().choose(instances);
         log.debug("loadBalancer.choose(urls) ===> " + instance);
 
         RpcResponse<?> rpcResponse = httpInvoker.post(rpcRequest, instance.toUrl());
 
+        Object result = castReturnResult(method, rpcResponse);
+
+        for (Filter filter : this.context.getFilters()) {
+            Object postResult = filter.postFilter(rpcRequest, rpcResponse, result);
+            if (postResult != null) {
+                return postResult;
+            }
+        }
+
+        return castReturnResult(method, rpcResponse);
+    }
+
+    private static Object castReturnResult(Method method, RpcResponse<?> rpcResponse) {
         if (rpcResponse.isStatus()) {
             Object result = rpcResponse.getData();
             return castMethodResult(method, result);
@@ -60,7 +81,6 @@ public class KaiInvocationHandler implements InvocationHandler {
         }
     }
 
-    @Nullable
     private static Object castMethodResult(Method method, Object result) {
         if (result instanceof JSONObject jsonResult) {
             return jsonResult.toJavaObject(method.getReturnType());

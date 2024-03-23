@@ -1,10 +1,7 @@
 package com.kai.kairpc.core.consumer;
 
 import com.kai.kairpc.core.annotation.KaiConsumer;
-import com.kai.kairpc.core.api.LoadBalancer;
-import com.kai.kairpc.core.api.RegistryCenter;
-import com.kai.kairpc.core.api.Router;
-import com.kai.kairpc.core.api.RpcContext;
+import com.kai.kairpc.core.api.*;
 import com.kai.kairpc.core.meta.InstanceMeta;
 import com.kai.kairpc.core.meta.ServiceMeta;
 import com.kai.kairpc.core.util.MethodUtils;
@@ -47,13 +44,16 @@ public class ConsumerBootstrap implements ApplicationContextAware, EnvironmentAw
     // 在所有的 Bean 初始化之后进行调用
     // 在 @KaiConsumer 标记的属性所在的 Bean 中更新该属性的值为代理类
     public void start() {
+        RegistryCenter rc = applicationContext.getBean(RegistryCenter.class);
+
         Router router = applicationContext.getBean(Router.class);
         LoadBalancer loadBalancer = applicationContext.getBean(LoadBalancer.class);
-        RegistryCenter rc = applicationContext.getBean(RegistryCenter.class);
+        List<Filter> filters = applicationContext.getBeansOfType(Filter.class).values().stream().toList();
 
         RpcContext context = new RpcContext();
         context.setRouter(router);
         context.setLoadBalancer(loadBalancer);
+        context.setFilters(filters);
 
         String[] names = applicationContext.getBeanDefinitionNames();
         for (String name : names) {
