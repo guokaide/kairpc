@@ -26,6 +26,6 @@ class KairpcDemoConsumerApplicationTests {
 
     @AfterAll
     static void destroy() {
-        SpringApplication.exit(applicationContext);
+        SpringApplication.exit(applicationContext, () -> 1);
     }
 }

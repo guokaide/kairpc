@@ -6,17 +6,23 @@ import lombok.NoArgsConstructor;
 
 import java.util.Map;
 
+/**
+ * 描述服务实例的元数据
+ */
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
 public class InstanceMeta {
 
+    // 核心参数
     private String schema;
     private String host;
     private Integer port;
     private String context;
+
+    // 扩展参数
     private boolean status; // true: online / false: offline
-    private Map<String, String> parameters;
+    private Map<String, String> parameters; // 附加的参数，比如加标签：idc: A B C
 
     public InstanceMeta(String schema, String host, Integer port, String context) {
         this.schema = schema;
