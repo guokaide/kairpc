@@ -92,4 +92,12 @@ public class UserServiceImpl implements UserService {
     public boolean getFlag(Boolean flag) {
         return flag;
     }
+
+    @Override
+    public User ex(boolean flag) {
+        if (flag) {
+            throw new RuntimeException("something is error");
+        }
+        return new User(0, "Kai");
+    }
 }

@@ -121,6 +121,14 @@ public class KairpcDemoConsumerApplication {
         System.out.println(userService.getFlag(false));
         System.out.println();
 
+        System.out.println("case 17: ==> [测试服务端抛出一个 RuntimeException 异常]");
+        try {
+            User ex = userService.ex(true);
+            System.out.println(ex);
+        } catch (Exception e) {
+            System.out.println("Exception: " + e.getMessage());
+        }
+
 
         // 测试 @KaiConsumer
 //            userAppService.test();

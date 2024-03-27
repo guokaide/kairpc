@@ -34,4 +34,6 @@ public interface UserService {
     Map<String, User> getMap(Map<String, User> userMap);
 
     boolean getFlag(Boolean flag);
+
+    User ex(boolean flag);
 }
