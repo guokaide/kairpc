@@ -1,8 +1,7 @@
 server:
-  port: 8088
+  port: 8084
 
 kairpc:
-  providers: http://localhost:8081,http://localhost:8082,http://localhost:8083
   zkServer: localhost:2182
   zkRoot: kairpc
 
