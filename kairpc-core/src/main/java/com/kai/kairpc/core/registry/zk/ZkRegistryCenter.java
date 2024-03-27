@@ -1,6 +1,6 @@
 package com.kai.kairpc.core.registry.zk;
 
-import com.kai.kairpc.core.api.KaiRpcException;
+import com.kai.kairpc.core.api.RpcException;
 import com.kai.kairpc.core.api.RegistryCenter;
 import com.kai.kairpc.core.meta.InstanceMeta;
 import com.kai.kairpc.core.meta.ServiceMeta;
@@ -71,7 +71,7 @@ public class ZkRegistryCenter implements RegistryCenter {
             log.info(" ===> register to zk: " + instancePath);
             client.create().withMode(CreateMode.EPHEMERAL).forPath(instancePath, "provider".getBytes());
         } catch (Exception e) {
-            throw new KaiRpcException(e);
+            throw new RpcException(e);
         }
     }
 
@@ -88,7 +88,7 @@ public class ZkRegistryCenter implements RegistryCenter {
             log.info(" ===> unregister from zk: " + instancePath);
             client.delete().quietly().forPath(instancePath);
         } catch (Exception e) {
-            throw new KaiRpcException(e);
+            throw new RpcException(e);
         }
     }
 
@@ -101,7 +101,7 @@ public class ZkRegistryCenter implements RegistryCenter {
             log.info("===> fetchAll from zk: " + servicePath + ", nodes: " + nodes);
             return mapInstances(nodes);
         } catch (Exception e) {
-            throw new KaiRpcException(e);
+            throw new RpcException(e);
         }
     }
 

@@ -74,10 +74,10 @@ public class KaiInvocationHandler implements InvocationHandler {
             return castMethodResult(method, rpcResponse.getData());
         } else {
             Exception exception = rpcResponse.getEx();
-            if (exception instanceof KaiRpcException e) {
+            if (exception instanceof RpcException e) {
                 throw e;
             } else {
-                throw new KaiRpcException(rpcResponse.getEx(), KaiRpcException.UNKNOWN);
+                throw new RpcException(rpcResponse.getEx(), RpcException.UNKNOWN);
             }
         }
     }

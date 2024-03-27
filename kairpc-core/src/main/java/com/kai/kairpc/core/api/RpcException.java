@@ -1,29 +1,32 @@
 package com.kai.kairpc.core.api;
 
-public class KaiRpcException extends RuntimeException {
+/**
+ * RPC 统一异常类
+ */
+public class RpcException extends RuntimeException {
 
     private String errCode;
 
-    public KaiRpcException() {
+    public RpcException() {
     }
 
-    public KaiRpcException(String message) {
+    public RpcException(String message) {
         super(message);
     }
 
-    public KaiRpcException(String message, Throwable cause) {
+    public RpcException(String message, Throwable cause) {
         super(message, cause);
     }
 
-    public KaiRpcException(Throwable cause) {
+    public RpcException(Throwable cause) {
         super(cause);
     }
 
-    public KaiRpcException(String message, Throwable cause, boolean enableSuppression, boolean writableStackTrace) {
+    public RpcException(String message, Throwable cause, boolean enableSuppression, boolean writableStackTrace) {
         super(message, cause, enableSuppression, writableStackTrace);
     }
 
-    public KaiRpcException(Throwable cause, String errCode) {
+    public RpcException(Throwable cause, String errCode) {
         super(cause);
         this.errCode = errCode;
     }
