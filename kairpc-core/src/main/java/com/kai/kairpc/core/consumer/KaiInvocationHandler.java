@@ -1,10 +1,7 @@
 package com.kai.kairpc.core.consumer;
 
 import com.alibaba.fastjson.JSONObject;
-import com.kai.kairpc.core.api.Filter;
-import com.kai.kairpc.core.api.RpcContext;
-import com.kai.kairpc.core.api.RpcRequest;
-import com.kai.kairpc.core.api.RpcResponse;
+import com.kai.kairpc.core.api.*;
 import com.kai.kairpc.core.consumer.http.OkHttpInvoker;
 import com.kai.kairpc.core.meta.InstanceMeta;
 import com.kai.kairpc.core.util.MethodUtils;
@@ -74,10 +71,14 @@ public class KaiInvocationHandler implements InvocationHandler {
 
     private static Object castReturnResult(Method method, RpcResponse<?> rpcResponse) {
         if (rpcResponse.isStatus()) {
-            Object result = rpcResponse.getData();
-            return castMethodResult(method, result);
+            return castMethodResult(method, rpcResponse.getData());
         } else {
-            throw new RuntimeException(rpcResponse.getEx());
+            Exception exception = rpcResponse.getEx();
+            if (exception instanceof KaiRpcException e) {
+                throw e;
+            } else {
+                throw new KaiRpcException(rpcResponse.getEx(), KaiRpcException.UNKNOWN);
+            }
         }
     }
 
