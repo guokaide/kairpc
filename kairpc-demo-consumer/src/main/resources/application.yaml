@@ -10,8 +10,10 @@ app:
   id: app1
   namespace: public
   env: dev
+  retries: 2
+  timeout: 1000
 
 logging:
   level:
     root: error
-    com.kai.kairpc: info
+    com.kai.kairpc: debug

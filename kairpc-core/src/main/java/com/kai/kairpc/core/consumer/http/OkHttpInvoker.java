@@ -17,12 +17,12 @@ public class OkHttpInvoker implements HttpInvoker {
 
     private final OkHttpClient client;
 
-    public OkHttpInvoker() {
+    public OkHttpInvoker(int readTimeoutMs, int writeTimeoutMs, int connectTimeoutMs) {
         this.client = new OkHttpClient.Builder()
                 .connectionPool(new ConnectionPool(16, 60, TimeUnit.SECONDS))
-                .readTimeout(1, TimeUnit.SECONDS)
-                .writeTimeout(1, TimeUnit.SECONDS)
-                .connectTimeout(1, TimeUnit.SECONDS)
+                .readTimeout(readTimeoutMs, TimeUnit.MILLISECONDS)
+                .writeTimeout(writeTimeoutMs, TimeUnit.MILLISECONDS)
+                .connectTimeout(connectTimeoutMs, TimeUnit.MILLISECONDS)
                 .build();
     }
 
@@ -41,7 +41,7 @@ public class OkHttpInvoker implements HttpInvoker {
                 return JSON.parseObject(responseJson, RpcResponse.class);
             }
         } catch (IOException e) {
-            e.printStackTrace();
+//            e.printStackTrace();
             throw new RuntimeException(e);
         }
     }

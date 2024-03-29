@@ -48,10 +48,10 @@ public class ConsumerConfig {
         return Router.DEFAULT;
     }
 
-    @Bean
-    public Filter filter() {
-        return new CacheFilter();
-    }
+//    @Bean
+//    public Filter filter() {
+//        return new CacheFilter();
+//    }
 
     @Bean(initMethod = "start", destroyMethod = "stop")
     public RegistryCenter consumerRegisterCenter() {

@@ -5,6 +5,7 @@ import lombok.Data;
 
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 @Data
 public class RpcContext {
@@ -15,6 +16,6 @@ public class RpcContext {
     // 染色: kairpc.color = gray
     // 追踪：kairpc.g_trace_id
     // gw -> service1 -> service2（跨线程传递）
-    private Map<String, String> parameters;
+    private Map<String, String> parameters = new ConcurrentHashMap<>();
 
 }

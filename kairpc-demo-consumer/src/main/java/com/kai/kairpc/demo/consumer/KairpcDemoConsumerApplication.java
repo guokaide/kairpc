@@ -11,6 +11,7 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Import;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.Arrays;
@@ -41,9 +42,24 @@ public class KairpcDemoConsumerApplication {
         return userService.findById(id);
     }
 
+    @RequestMapping("/find")
+    public User find(@RequestParam("timeout") int timeout) {
+        return userService.find(timeout);
+    }
+
     @Bean
     public ApplicationRunner applicationRunner() {
-        return x -> testAll();
+        return x -> {
+            // 超时重试的漏斗原则
+            // A 2000 -> B 1500 -> C 1200 -> 1000
+            long start = System.currentTimeMillis();
+            // RpcContext.set("k", "v") // 需要考虑使用 ThreadLocal
+            userService.find(800);
+            // RpcContext.remove("k", "v") // 需要考虑清理 ThreadLocal
+            System.out.println("userService.find(800) take " +
+                    (System.currentTimeMillis() - start) + "ms");
+            // testAll();
+        };
     }
 
     private void testAll() {

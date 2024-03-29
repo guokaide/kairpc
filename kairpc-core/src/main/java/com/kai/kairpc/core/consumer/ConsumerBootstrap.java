@@ -39,6 +39,12 @@ public class ConsumerBootstrap implements ApplicationContextAware, EnvironmentAw
     @Value("${app.env}")
     private String env;
 
+    @Value("${app.retries}")
+    private String retries;
+
+    @Value("${app.timeout}")
+    private String timeout;
+
     private Map<String, Object> stub = new HashMap<>();
 
     // 在所有的 Bean 初始化之后进行调用
@@ -54,6 +60,8 @@ public class ConsumerBootstrap implements ApplicationContextAware, EnvironmentAw
         context.setRouter(router);
         context.setLoadBalancer(loadBalancer);
         context.setFilters(filters);
+        context.getParameters().put("app.retries", retries);
+        context.getParameters().put("app.timeout", timeout);
 
         String[] names = applicationContext.getBeanDefinitionNames();
         for (String name : names) {

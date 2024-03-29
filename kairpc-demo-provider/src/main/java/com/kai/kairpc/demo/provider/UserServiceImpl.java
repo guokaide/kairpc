@@ -98,6 +98,19 @@ public class UserServiceImpl implements UserService {
         if (flag) {
             throw new RuntimeException("something is error");
         }
-        return new User(0, "Kai");
+        return new User(0, "Kai0");
+    }
+
+    @Override
+    public User find(int timeout) {
+        String port = environment.getProperty("server.port");
+        if ("8081".equals(port)) {
+            try {
+                Thread.sleep(timeout);
+            } catch (InterruptedException e) {
+                throw new RuntimeException(e);
+            }
+        }
+        return new User(0, "Kai0-" + port);
     }
 }
