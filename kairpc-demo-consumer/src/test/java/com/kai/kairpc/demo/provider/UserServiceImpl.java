@@ -7,6 +7,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.core.env.Environment;
 import org.springframework.stereotype.Service;
 
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 
@@ -77,9 +78,11 @@ public class UserServiceImpl implements UserService {
     // java.lang.ClassCastException: class java.util.LinkedHashMap cannot be cast to class com.kai.kairpc.demo.api.User (java.util.LinkedHashMap is in module java.base of loader 'bootstrap'; com.kai.kairpc.demo.api.User is in unnamed module of loader 'app')
     @Override
     public List<User> getList(List<User> users) {
+        // 处理的话，会报错
 //        return users.stream().peek(x -> {
 //            x.setName(x.getName() + "_" + System.currentTimeMillis());
 //        }).collect(Collectors.toList());
+        // 不处理的话，不报错
         return users;
     }
 
@@ -101,8 +104,23 @@ public class UserServiceImpl implements UserService {
         return new User(0, "Kai");
     }
 
+    String timeoutPorts = "8081,8094";
+
     @Override
     public User find(int timeout) {
-        return null;
+        String port = environment.getProperty("server.port");
+        if (Arrays.asList(timeoutPorts.split(",")).contains(port)) {
+            try {
+                Thread.sleep(timeout);
+            } catch (InterruptedException e) {
+                throw new RuntimeException(e);
+            }
+        }
+        return new User(0, "Kai0-" + port);
+    }
+
+    @Override
+    public void setTimeoutPorts(String ports) {
+        timeoutPorts = ports;
     }
 }

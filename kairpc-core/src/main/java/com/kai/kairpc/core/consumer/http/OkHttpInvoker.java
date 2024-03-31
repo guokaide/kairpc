@@ -29,7 +29,7 @@ public class OkHttpInvoker implements HttpInvoker {
     @Override
     public RpcResponse<?> post(RpcRequest rpcRequest, String url) {
         String requestJson = JSON.toJSONString(rpcRequest);
-        log.debug("requestJson ===> " + requestJson);
+        log.debug(" ==> requestJson: " + requestJson);
         Request request = new Request.Builder()
                 .url(url)
                 .post(RequestBody.create(requestJson, JSON_TYPE))
@@ -37,7 +37,7 @@ public class OkHttpInvoker implements HttpInvoker {
         try {
             try (Response response = client.newCall(request).execute()) {
                 String responseJson = response.body().string();
-                log.debug("responseJson ===> " + responseJson);
+                log.debug(" ==> responseJson: " + responseJson);
                 return JSON.parseObject(responseJson, RpcResponse.class);
             }
         } catch (IOException e) {

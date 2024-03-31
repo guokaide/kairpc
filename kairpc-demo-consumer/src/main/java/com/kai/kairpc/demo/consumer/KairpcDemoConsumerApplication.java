@@ -50,15 +50,7 @@ public class KairpcDemoConsumerApplication {
     @Bean
     public ApplicationRunner applicationRunner() {
         return x -> {
-            // 超时重试的漏斗原则
-            // A 2000 -> B 1500 -> C 1200 -> 1000
-            long start = System.currentTimeMillis();
-            // RpcContext.set("k", "v") // 需要考虑使用 ThreadLocal
-            userService.find(800);
-            // RpcContext.remove("k", "v") // 需要考虑清理 ThreadLocal
-            System.out.println("userService.find(800) take " +
-                    (System.currentTimeMillis() - start) + "ms");
-            // testAll();
+            testAll();
         };
     }
 
@@ -145,6 +137,15 @@ public class KairpcDemoConsumerApplication {
             System.out.println("Exception: " + e.getMessage());
         }
 
+        System.out.println("case 18: ==> [测试服务端抛出一个超时重试后成功的场景]");
+        // 超时重试的漏斗原则
+        // A 2000 -> B 1500 -> C 1200 -> 1000
+        long start = System.currentTimeMillis();
+        // RpcContext.set("k", "v") // 需要考虑使用 ThreadLocal
+        userService.find(1100);
+        userService.find(1100);
+        // RpcContext.remove("k", "v") // 需要考虑清理 ThreadLocal
+        System.out.println("userService.find(800) take " + (System.currentTimeMillis() - start) + "ms");
 
         // 测试 @KaiConsumer
 //            userAppService.test();
