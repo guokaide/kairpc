@@ -4,6 +4,7 @@ import com.kai.kairpc.core.api.Filter;
 import com.kai.kairpc.core.api.LoadBalancer;
 import com.kai.kairpc.core.api.RegistryCenter;
 import com.kai.kairpc.core.api.Router;
+import com.kai.kairpc.core.cluster.GrayRouter;
 import com.kai.kairpc.core.cluster.RoundRobinBalancer;
 import com.kai.kairpc.core.filter.CacheFilter;
 import com.kai.kairpc.core.registry.zk.ZkRegistryCenter;
@@ -20,6 +21,9 @@ public class ConsumerConfig {
 
     @Value("${kairpc.providers}")
     String servers;
+
+    @Value("${app.grayRatio:1}")
+    int grayRatio;
 
     @Bean
     ConsumerBootstrap consumerBootstrap() {
@@ -45,7 +49,8 @@ public class ConsumerConfig {
 
     @Bean
     public Router router() {
-        return Router.DEFAULT;
+        return new GrayRouter(grayRatio);
+//        return Router.DEFAULT;
     }
 
 //    @Bean

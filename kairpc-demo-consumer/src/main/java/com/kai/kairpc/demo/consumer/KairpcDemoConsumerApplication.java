@@ -1,6 +1,8 @@
 package com.kai.kairpc.demo.consumer;
 
 import com.kai.kairpc.core.annotation.KaiConsumer;
+import com.kai.kairpc.core.api.Router;
+import com.kai.kairpc.core.cluster.GrayRouter;
 import com.kai.kairpc.core.consumer.ConsumerConfig;
 import com.kai.kairpc.demo.api.User;
 import com.kai.kairpc.demo.api.UserService;
@@ -38,13 +40,22 @@ public class KairpcDemoConsumerApplication {
     }
 
     @RequestMapping("/")
-    public User findById(int id) {
+    public User findById(@RequestParam("id") int id) {
         return userService.findById(id);
     }
 
     @RequestMapping("/find")
     public User find(@RequestParam("timeout") int timeout) {
         return userService.find(timeout);
+    }
+
+    @Autowired
+    Router grayRouter;
+
+    @RequestMapping("/gray")
+    public String gray(@RequestParam("ratio") int ratio) {
+        ((GrayRouter) grayRouter).setGrayRatio(ratio);
+        return "OK: new ratio is " + ratio;
     }
 
     @Bean
