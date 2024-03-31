@@ -51,6 +51,9 @@ public class ProviderBootstrap implements ApplicationContextAware {
     @Value("${app.env}")
     private String env;
 
+    @Value("#{${app.metas}}")
+    private Map<String, String> metas;
+
     @PostConstruct // init-method，此时所有的 Bean 对象都已经创建好了（new 出来了），但是有可能没有初始化完成
     public void init() {
         registryCenter = applicationContext.getBean(RegistryCenter.class);
@@ -74,6 +77,8 @@ public class ProviderBootstrap implements ApplicationContextAware {
     public void start() {
         String ip = InetAddress.getLocalHost().getHostAddress();
         this.instance = InstanceMeta.http(ip, Integer.valueOf(port));
+
+        this.instance.getParameters().putAll(metas);
 
         registryCenter.start();
         // 服务注册：将提供的服务注册到注册中心

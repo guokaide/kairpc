@@ -136,6 +136,7 @@ public class KairpcDemoConsumerApplication {
         } catch (Exception e) {
             System.out.println("Exception: " + e.getMessage());
         }
+        System.out.println();
 
         System.out.println("case 18: ==> [测试服务端抛出一个超时重试后成功的场景]");
         // 超时重试的漏斗原则
@@ -146,7 +147,7 @@ public class KairpcDemoConsumerApplication {
         userService.find(1100);
         // RpcContext.remove("k", "v") // 需要考虑清理 ThreadLocal
         System.out.println("userService.find(800) take " + (System.currentTimeMillis() - start) + "ms");
-
+        System.out.println();
         // 测试 @KaiConsumer
 //            userAppService.test();
     }

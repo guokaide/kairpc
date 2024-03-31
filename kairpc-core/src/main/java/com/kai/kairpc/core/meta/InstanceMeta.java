@@ -1,9 +1,11 @@
 package com.kai.kairpc.core.meta;
 
+import com.alibaba.fastjson.JSON;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.util.HashMap;
 import java.util.Map;
 
 /**
@@ -21,8 +23,8 @@ public class InstanceMeta {
     private String context;
 
     // 扩展参数
-    private boolean status; // true: online / false: offline
-    private Map<String, String> parameters; // 附加的参数，比如加标签：idc: A B C
+    private boolean status; // true: online / false: offline => 表示节点是否可用
+    private Map<String, String> parameters = new HashMap<>(); // 附加的参数，比如加标签：idc: A B C
 
     public InstanceMeta(String schema, String host, Integer port, String context) {
         this.schema = schema;
@@ -41,5 +43,9 @@ public class InstanceMeta {
 
     public static InstanceMeta http(String host, Integer port) {
         return new InstanceMeta("http", host, port, "");
+    }
+
+    public String toMetas() {
+        return JSON.toJSONString(this.getParameters());
     }
 }

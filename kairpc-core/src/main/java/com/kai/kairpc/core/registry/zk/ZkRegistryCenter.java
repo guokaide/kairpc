@@ -1,7 +1,9 @@
 package com.kai.kairpc.core.registry.zk;
 
-import com.kai.kairpc.core.api.RpcException;
+import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.JSONObject;
 import com.kai.kairpc.core.api.RegistryCenter;
+import com.kai.kairpc.core.api.RpcException;
 import com.kai.kairpc.core.meta.InstanceMeta;
 import com.kai.kairpc.core.meta.ServiceMeta;
 import com.kai.kairpc.core.registry.ChangedListener;
@@ -28,7 +30,7 @@ import java.util.stream.Collectors;
 @Slf4j
 public class ZkRegistryCenter implements RegistryCenter {
 
-    private CuratorFramework client = null;
+    private static CuratorFramework client = null;
     private final Map<ServiceMeta, TreeCache> treeCaches = new HashMap<>();
 
     @Value("${kairpc.zkServer}")
@@ -69,7 +71,7 @@ public class ZkRegistryCenter implements RegistryCenter {
             // 创建实例的临时节点
             String instancePath = servicePath + "/" + instance.toPath();
             log.info(" ===> register to zk: " + instancePath);
-            client.create().withMode(CreateMode.EPHEMERAL).forPath(instancePath, "provider".getBytes());
+            client.create().withMode(CreateMode.EPHEMERAL).forPath(instancePath, instance.toMetas().getBytes());
         } catch (Exception e) {
             throw new RpcException(e);
         }
@@ -99,17 +101,32 @@ public class ZkRegistryCenter implements RegistryCenter {
             // 获取所有子节点
             List<String> nodes = client.getChildren().forPath(servicePath);
             log.info("===> fetchAll from zk: " + servicePath + ", nodes: " + nodes);
-            return mapInstances(nodes);
+            return mapInstances(nodes, servicePath);
         } catch (Exception e) {
             throw new RpcException(e);
         }
     }
 
     @NotNull
-    private static List<InstanceMeta> mapInstances(List<String> nodes) {
+    private static List<InstanceMeta> mapInstances(List<String> nodes, String servicePath) {
         return nodes.stream().map(x -> {
             String[] strings = x.split("_");
-            return InstanceMeta.http(strings[0], Integer.valueOf(strings[1]));
+            InstanceMeta instance = InstanceMeta.http(strings[0], Integer.valueOf(strings[1]));
+
+            try {
+                String nodePath = servicePath + "/" + x;
+                byte[] bytes = client.getData().forPath(nodePath);
+                JSONObject jsonObject = JSON.parseObject(new String(bytes));
+                log.debug("node: {}", nodePath);
+                jsonObject.forEach((k, v) -> {
+                    log.debug("{} -> {}", k, v);
+                    instance.getParameters().put(k, v == null ? null : v.toString());
+                });
+            } catch (Exception e) {
+                throw new RuntimeException(e);
+            }
+
+            return instance;
         }).collect(Collectors.toList());
     }
 
