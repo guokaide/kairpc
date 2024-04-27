@@ -11,6 +11,8 @@ public interface UserService {
 
     User findById(int id, String name);
 
+    User findById(long id);
+
     int getId(int id);
 
     long getId(long id);
@@ -34,6 +36,8 @@ public interface UserService {
     Map<String, User> getMap(Map<String, User> userMap);
 
     boolean getFlag(Boolean flag);
+
+    User[] getUsers(User[] users);
 
     User ex(boolean flag);
 

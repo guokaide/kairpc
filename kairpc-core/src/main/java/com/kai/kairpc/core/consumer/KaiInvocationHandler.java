@@ -1,6 +1,5 @@
 package com.kai.kairpc.core.consumer;
 
-import com.alibaba.fastjson.JSONObject;
 import com.kai.kairpc.core.api.*;
 import com.kai.kairpc.core.consumer.http.OkHttpInvoker;
 import com.kai.kairpc.core.governance.SlidingTimeWindow;
@@ -11,6 +10,7 @@ import lombok.extern.slf4j.Slf4j;
 
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
+import java.lang.reflect.Type;
 import java.net.SocketTimeoutException;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -54,7 +54,7 @@ public class KaiInvocationHandler implements InvocationHandler {
     }
 
     @Override
-    public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
+    public Object invoke(Object proxy, Method method, Object[] args) {
         if (MethodUtils.checkLocalMethod(method)) {
             return null;
         }
@@ -98,7 +98,7 @@ public class KaiInvocationHandler implements InvocationHandler {
                 String url = instance.toUrl();
                 try {
                     rpcResponse = httpInvoker.post(rpcRequest, url);
-                    result = castReturnResult(method, rpcResponse);
+                    result = processResponse(method, rpcResponse);
                 } catch (Exception e) {
                     // 1. 故障隔离：故障的规则统计和隔离
                     synchronized (windows) {
@@ -136,7 +136,7 @@ public class KaiInvocationHandler implements InvocationHandler {
                     }
                 }
 
-                return castReturnResult(method, rpcResponse);
+                return processResponse(method, rpcResponse);
             } catch (Exception e) {
                 if (!(e.getCause() instanceof SocketTimeoutException)) {
                     throw e;
@@ -160,9 +160,9 @@ public class KaiInvocationHandler implements InvocationHandler {
         log.debug(" ==> isolated providers = {}", isolatedProviders);
     }
 
-    private static Object castReturnResult(Method method, RpcResponse<?> rpcResponse) {
+    private static Object processResponse(Method method, RpcResponse<?> rpcResponse) {
         if (rpcResponse.isStatus()) {
-            return castMethodResult(method, rpcResponse.getData());
+            return castResponseData(method, rpcResponse.getData());
         } else {
             Exception exception = rpcResponse.getEx();
             if (exception instanceof RpcException e) {
@@ -173,12 +173,10 @@ public class KaiInvocationHandler implements InvocationHandler {
         }
     }
 
-    private static Object castMethodResult(Method method, Object result) {
-        if (result instanceof JSONObject jsonResult) {
-            return jsonResult.toJavaObject(method.getReturnType());
-        } else {
-            return TypeUtils.cast(result, method.getReturnType());
-        }
+    private static Object castResponseData(Method method, Object data) {
+        Class<?> type = method.getReturnType();
+        Type genericReturnType = method.getGenericReturnType();
+        return TypeUtils.cast(data, type, genericReturnType);
     }
 
 }

@@ -17,4 +17,4 @@ app:
 logging:
   level:
     root: error
-    com.kai.kairpc: debug
+    com.kai.kairpc: info

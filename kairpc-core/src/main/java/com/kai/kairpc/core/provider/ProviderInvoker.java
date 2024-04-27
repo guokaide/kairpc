@@ -1,12 +1,15 @@
 package com.kai.kairpc.core.provider;
 
+import com.kai.kairpc.core.api.RpcException;
 import com.kai.kairpc.core.api.RpcRequest;
 import com.kai.kairpc.core.api.RpcResponse;
 import com.kai.kairpc.core.meta.ProviderMeta;
 import com.kai.kairpc.core.util.TypeUtils;
 import org.springframework.util.MultiValueMap;
 
+import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.lang.reflect.Type;
 import java.util.List;
 import java.util.Optional;
 
@@ -24,25 +27,26 @@ public class ProviderInvoker {
         try {
             ProviderMeta meta = findProviderMeta(providerMetas, request.getMethodSign());
             Method method = meta.getMethod();
-            Object[] args = processArgs(request.getArgs(), method.getParameterTypes());
+            Object[] args = processArgs(request.getArgs(), method.getParameterTypes(), method.getGenericParameterTypes());
             Object result = method.invoke(meta.getServiceImpl(), args);
             rpcResponse.setStatus(true);
             rpcResponse.setData(result);
             return rpcResponse;
-        } catch (Exception e) {
-            String message = e.getCause() != null ? e.getCause().getMessage() : e.getMessage();
-            rpcResponse.setEx(new RuntimeException(message));
+        } catch (InvocationTargetException e) {
+            rpcResponse.setEx(new RpcException(e.getCause().getMessage()));
+        } catch (IllegalAccessException e) {
+            rpcResponse.setEx(new RpcException(e.getMessage()));
         }
         return rpcResponse;
     }
 
-    private Object[] processArgs(Object[] args, Class<?>[] parameterTypes) {
+    private Object[] processArgs(Object[] args, Class<?>[] parameterTypes, Type[] genericParameterTypes) {
         if (args == null || args.length == 0) {
             return args;
         }
         Object[] actualArgs = new Object[args.length];
         for (int i = 0; i < args.length; i++) {
-            actualArgs[i] = TypeUtils.cast(args[i], parameterTypes[i]);
+            actualArgs[i] = TypeUtils.cast(args[i], parameterTypes[i], genericParameterTypes[i]);
         }
         return actualArgs;
     }

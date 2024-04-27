@@ -29,9 +29,6 @@ public class KairpcDemoConsumerApplication {
     @KaiConsumer
     UserService userService;
 
-//    @KaiConsumer
-//    OrderService orderService;
-
     @Autowired
     UserAppService userAppService;
 
@@ -60,9 +57,7 @@ public class KairpcDemoConsumerApplication {
 
     @Bean
     public ApplicationRunner applicationRunner() {
-        return x -> {
-            testAll();
-        };
+        return x -> testAll();
     }
 
     private void testAll() {
@@ -95,11 +90,11 @@ public class KairpcDemoConsumerApplication {
 
         // case: 输入基本类型
         System.out.println("case 6: ==> [常规 int 类型，返回 User 对象]");
-        System.out.println(userService.getId(10));
+        System.out.println("userService.getId(10) = " + userService.getId(10));
         System.out.println();
 
         System.out.println("case 7: ==> [测试参数是 long+float 类型]");
-        System.out.println("userService.getId(100L) = " + userService.getId(10L));
+        System.out.println("userService.getId(10L) = " + userService.getId(10L));
         System.out.println("userService.getId(10f) = " + userService.getId(10f));
         System.out.println();
 
@@ -120,12 +115,16 @@ public class KairpcDemoConsumerApplication {
                 Arrays.toString(userService.getIds(new int[]{4, 5, 6})));
         System.out.println();
 
-        // case: 输入 List、输出 List
+        // case: 输入 List、输出 List（处理泛型）
         System.out.println("case 11: ==> [测试参数和返回值都是 List 类型]");
-        System.out.println(userService.getList(List.of(
-                new User(100, "Kai100"),
-                new User(101, "Kai101")
-        )));
+        System.out.println("userService.getList(List.of(\n" +
+                "                new User(100, \"Kai100\"),\n" +
+                "                new User(101, \"Kai101\")\n" +
+                ")) = " +
+                userService.getList(List.of(
+                        new User(100, "Kai100"),
+                        new User(101, "Kai101")
+                )));
         System.out.println();
 
         // case: 输入 Map、输出 Map
@@ -133,11 +132,26 @@ public class KairpcDemoConsumerApplication {
         Map<String, User> map = new HashMap<>();
         map.put("M200", new User(200, "Kai200"));
         map.put("M201", new User(201, "Kai201"));
-        System.out.println(userService.getMap(map));
+        System.out.println("userService.getMap(map) = " + userService.getMap(map));
         System.out.println();
 
         System.out.println("case 13: ==> [测试参数和返回值都是 Boolean/boolean 类型]");
         System.out.println(userService.getFlag(false));
+        System.out.println();
+
+        System.out.println("case 14: ==> [测试参数和返回值都是 User[] 类型]");
+        System.out.println(Arrays.toString(userService.getUsers(new User[]{
+                new User(140, "case14"),
+                new User(141, "case14")
+        })));
+        System.out.println();
+
+        System.out.println("case 15: ==> [测试参数为 long, 返回值为 User]");
+        System.out.println(userService.findById(1000L));
+        System.out.println();
+
+        System.out.println("case 16: ==> [测试参数为 boolean, 返回值为 User]");
+        System.out.println(userService.ex(false));
         System.out.println();
 
         System.out.println("case 17: ==> [测试服务端抛出一个 RuntimeException 异常]");
@@ -150,16 +164,12 @@ public class KairpcDemoConsumerApplication {
         System.out.println();
 
         System.out.println("case 18: ==> [测试服务端抛出一个超时重试后成功的场景]");
-        // 超时重试的漏斗原则
+        // 超时重试的【漏斗原则】
         // A 2000 -> B 1500 -> C 1200 -> 1000
         long start = System.currentTimeMillis();
-        // RpcContext.set("k", "v") // 需要考虑使用 ThreadLocal
         userService.find(1100);
         userService.find(1100);
-        // RpcContext.remove("k", "v") // 需要考虑清理 ThreadLocal
-        System.out.println("userService.find(800) take " + (System.currentTimeMillis() - start) + "ms");
+        System.out.println("userService.find(1100) take " + (System.currentTimeMillis() - start) + "ms");
         System.out.println();
-        // 测试 @KaiConsumer
-//            userAppService.test();
     }
 }

@@ -10,6 +10,7 @@ import org.springframework.stereotype.Service;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 @Service
 @KaiProvider
@@ -28,6 +29,11 @@ public class UserServiceImpl implements UserService {
     @Override
     public User findById(int id, String name) {
         return new User(id, "Kai-" + name + "_" + System.currentTimeMillis());
+    }
+
+    @Override
+    public User findById(long id) {
+        return new User((int) id, "Kai-" + System.currentTimeMillis());
     }
 
     @Override
@@ -75,17 +81,16 @@ public class UserServiceImpl implements UserService {
         return "Cola-" + id;
     }
 
-    // java.lang.ClassCastException: class java.util.LinkedHashMap cannot be cast to class com.kai.kairpc.demo.api.User (java.util.LinkedHashMap is in module java.base of loader 'bootstrap'; com.kai.kairpc.demo.api.User is in unnamed module of loader 'app')
+    // java.lang.ClassCastException: class java.util.LinkedHashMap cannot be cast to class com.kai.kairpc.demo.api.User
+    // 这个报错是因为没有 List<User> 的泛型丢失，变成了 List<LinkedHashMap>
     @Override
     public List<User> getList(List<User> users) {
-//        return users.stream().peek(x -> {
-//            x.setName(x.getName() + "_" + System.currentTimeMillis());
-//        }).collect(Collectors.toList());
-        return users;
+        return users.stream().peek(x -> x.setName(x.getName() + "_" + System.currentTimeMillis())).collect(Collectors.toList());
     }
 
     @Override
     public Map<String, User> getMap(Map<String, User> userMap) {
+        userMap.forEach((k, v) -> v.setName(v.getName() + "_" + System.currentTimeMillis()));
         return userMap;
     }
 
@@ -95,11 +100,16 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
+    public User[] getUsers(User[] users) {
+        return Arrays.stream(users).peek(x -> x.setName(x.getName() + "_" + System.currentTimeMillis())).toList().toArray(User[]::new);
+    }
+
+    @Override
     public User ex(boolean flag) {
         if (flag) {
             throw new RuntimeException("something is error");
         }
-        return new User(0, "Kai0");
+        return new User(0, "Kai-ex-0");
     }
 
     String timeoutPorts = "8081,8094";
