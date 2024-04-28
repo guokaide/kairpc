@@ -2,15 +2,15 @@ package com.kai.kairpc.core.provider;
 
 import com.kai.kairpc.core.annotation.KaiProvider;
 import com.kai.kairpc.core.api.RegistryCenter;
-import com.kai.kairpc.core.api.RpcRequest;
-import com.kai.kairpc.core.api.RpcResponse;
+import com.kai.kairpc.core.meta.InstanceMeta;
 import com.kai.kairpc.core.meta.ProviderMeta;
+import com.kai.kairpc.core.meta.ServiceMeta;
 import com.kai.kairpc.core.util.MethodUtils;
-import com.kai.kairpc.core.util.TypeUtils;
 import jakarta.annotation.PostConstruct;
 import jakarta.annotation.PreDestroy;
 import lombok.Data;
 import lombok.SneakyThrows;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
@@ -20,32 +20,46 @@ import org.springframework.util.MultiValueMap;
 import java.lang.reflect.Method;
 import java.net.InetAddress;
 import java.util.Arrays;
-import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 
 /**
  * 服务提供者启动类
  * implements ApplicationContextAware 是为了 Spring 启动的时候，set applicationContext
  */
+@Slf4j
 @Data
 public class ProviderBootstrap implements ApplicationContextAware {
 
     ApplicationContext applicationContext;
 
+    RegistryCenter registryCenter;
+
     // <InterfaceName, List<ProviderMeta>>
     private MultiValueMap<String, ProviderMeta> skeleton = new LinkedMultiValueMap<>();
 
-    private String instance;
+    private InstanceMeta instance;
 
     @Value("${server.port}")
     private String port;
 
+    @Value("${app.id}")
+    private String app;
+
+    @Value("${app.namespace}")
+    private String namespace;
+
+    @Value("${app.env}")
+    private String env;
+
+    @Value("#{${app.metas}}")
+    private Map<String, String> metas;
+
     @PostConstruct // init-method，此时所有的 Bean 对象都已经创建好了（new 出来了），但是有可能没有初始化完成
     public void init() {
+        registryCenter = applicationContext.getBean(RegistryCenter.class);
         // <beanName, 接口实现类>
         Map<String, Object> providers = applicationContext.getBeansWithAnnotation(KaiProvider.class);
-        providers.forEach((k, v) -> System.out.println(k));
+        providers.forEach((k, v) -> log.info(k));
 
         // 本地注册：将提供的服务暴露出去
         providers.values().forEach(this::registerProvider);
@@ -62,8 +76,11 @@ public class ProviderBootstrap implements ApplicationContextAware {
     @SneakyThrows
     public void start() {
         String ip = InetAddress.getLocalHost().getHostAddress();
-        this.instance = ip + "_" + port;
+        this.instance = InstanceMeta.http(ip, Integer.valueOf(port));
 
+        this.instance.getParameters().putAll(metas);
+
+        registryCenter.start();
         // 服务注册：将提供的服务注册到注册中心
         skeleton.keySet().forEach(this::registerService);
     }
@@ -71,75 +88,36 @@ public class ProviderBootstrap implements ApplicationContextAware {
     @PreDestroy
     public void stop() {
         skeleton.keySet().forEach(this::unregisterService);
+        registryCenter.stop();
     }
 
     private void unregisterService(String service) {
-        RegistryCenter rc = applicationContext.getBean(RegistryCenter.class);
-        rc.unregister(service, instance);
+        ServiceMeta serviceMeta = ServiceMeta.builder().app(app).namespace(namespace).env(env).name(service).build();
+        registryCenter.unregister(serviceMeta, instance);
     }
 
     private void registerService(String service) {
-        RegistryCenter rc = applicationContext.getBean(RegistryCenter.class);
-        rc.register(service, instance);
-    }
-
-    public RpcResponse invoke(RpcRequest request) {
-        RpcResponse rpcResponse = new RpcResponse();
-        List<ProviderMeta> providerMetas = skeleton.get(request.getService());
-        try {
-            ProviderMeta meta = findProviderMeta(providerMetas, request.getMethodSign());
-            Method method = meta.getMethod();
-            Object[] args = processArgs(request.getArgs(), method.getParameterTypes());
-            Object result = method.invoke(meta.getServiceImpl(), args);
-            rpcResponse.setStatus(true);
-            rpcResponse.setData(result);
-            return rpcResponse;
-        } catch (Exception e) {
-            String message = e.getCause() != null ? e.getCause().getMessage() : e.getMessage();
-            rpcResponse.setEx(new RuntimeException(message));
-        }
-        return rpcResponse;
-    }
-
-    private Object[] processArgs(Object[] args, Class<?>[] parameterTypes) {
-        if (args == null || args.length == 0) {
-            return args;
-        }
-        Object[] actualArgs = new Object[args.length];
-        for (int i = 0; i < args.length; i++) {
-            actualArgs[i] = TypeUtils.cast(args[i], parameterTypes[i]);
-        }
-        return actualArgs;
-    }
-
-    private ProviderMeta findProviderMeta(List<ProviderMeta> providerMetas, String methodSign) {
-        Optional<ProviderMeta> optional = providerMetas.stream()
-                .filter(x -> x.getMethodSign().equals(methodSign)).findFirst();
-        return optional.orElse(null);
+        ServiceMeta serviceMeta = ServiceMeta.builder().app(app).namespace(namespace).env(env).name(service).build();
+        registryCenter.register(serviceMeta, instance);
     }
 
     // 可以将服务提供方提供的实现类的方法签名全部都缓存起来，原因是：
     // 1. 服务提供方提供的方法是有限的，即使全部缓存起来也没有问题
     // 2. 如果没有缓存，服务消费方每次调用，都需要计算方法签名的话，会影响性能
-    private void registerProvider(Object object) {
-        Arrays.stream(object.getClass().getInterfaces()).forEach(anInterface -> {
-            Method[] methods = anInterface.getMethods();
-            for (Method method : methods) {
-                if (MethodUtils.checkLocalMethod(method)) {
-                    continue;
-                }
-                createProvider(anInterface, object, method);
-            }
-        });
+    private void registerProvider(Object impl) {
+        Arrays.stream(impl.getClass().getInterfaces()).forEach(
+                service -> {
+                    Arrays.stream(service.getMethods())
+                            .filter(method -> !MethodUtils.checkLocalMethod(method))
+                            .forEach(method -> createProvider(service, impl, method));
+                });
     }
 
-    private void createProvider(Class<?> anInterface, Object object, Method method) {
-        ProviderMeta meta = new ProviderMeta();
-        meta.setMethod(method);
-        meta.setServiceImpl(object);
-        meta.setMethodSign(MethodUtils.methodSign(method));
-        System.out.println("create a provider: " + meta);
-        skeleton.add(anInterface.getCanonicalName(), meta);
+    private void createProvider(Class<?> service, Object impl, Method method) {
+        ProviderMeta providerMeta = ProviderMeta.builder()
+                .method(method).serviceImpl(impl).methodSign(MethodUtils.methodSign(method)).build();
+        log.info("create a provider: " + providerMeta);
+        skeleton.add(service.getCanonicalName(), providerMeta);
     }
 
 }

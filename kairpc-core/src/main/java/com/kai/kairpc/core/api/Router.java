@@ -5,9 +5,9 @@ import java.util.List;
 /**
  * 路由器：根据规则选择目标服务
  */
-public interface Router {
+public interface Router<T> {
 
-    List<String> choose(List<String> providers);
+    List<T> choose(List<T> providers);
 
     Router DEFAULT = providers -> providers;
 

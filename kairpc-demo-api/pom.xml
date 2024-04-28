@@ -6,7 +6,6 @@
 		<groupId>com.kai</groupId>
 		<artifactId>kairpc</artifactId>
 		<version>0.0.1-SNAPSHOT</version>
-		<relativePath/> <!-- lookup parent from repository -->
 	</parent>
 
 	<artifactId>kairpc-demo-api</artifactId>
@@ -14,15 +13,12 @@
 	<name>kairpc-demo-api</name>
 	<description>kairpc-demo-api</description>
 
-	<properties>
-		<java.version>17</java.version>
-	</properties>
-
 	<dependencies>
 		<dependency>
 			<groupId>org.projectlombok</groupId>
 			<artifactId>lombok</artifactId>
-			<optional>true</optional>
+			<version>1.18.30</version>
+			<scope>provided</scope>
 		</dependency>
 	</dependencies>
 

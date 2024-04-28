@@ -3,7 +3,7 @@ server:
 
 kairpc:
   providers: http://localhost:8081,http://localhost:8082,http://localhost:8083
-  zkServer: localhost:2181
+  zkServer: localhost:2182
   zkRoot: kairpc
 
 app:
@@ -12,9 +12,8 @@ app:
   env: dev
   retries: 2
   timeout: 1000
-  grayRatio: 10 # // 0-100
 
 logging:
   level:
     root: error
-    com.kai.kairpc: info
+    com.kai.kairpc: debug

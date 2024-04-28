@@ -4,20 +4,23 @@ import com.kai.kairpc.core.api.LoadBalancer;
 import com.kai.kairpc.core.api.RegistryCenter;
 import com.kai.kairpc.core.api.Router;
 import com.kai.kairpc.core.cluster.RoundRobinBalancer;
-import com.kai.kairpc.core.registry.ZkRegistryCenter;
+import com.kai.kairpc.core.registry.zk.ZkRegistryCenter;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.ApplicationRunner;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.annotation.Order;
 
-import java.util.List;
-
+@Slf4j
 @Configuration
 public class ConsumerConfig {
 
     @Value("${kairpc.providers}")
     String servers;
+
+    @Value("${app.grayRatio:1}")
+    int grayRatio;
 
     @Bean
     ConsumerBootstrap consumerBootstrap() {
@@ -30,9 +33,9 @@ public class ConsumerConfig {
     @Order(Integer.MIN_VALUE)
     public ApplicationRunner consumerBootstrapRunner(ConsumerBootstrap consumerBootstrap) {
         return x -> {
-            System.out.println("consumerBootstrapRunner start ...");
+            log.info("consumerBootstrapRunner start ...");
             consumerBootstrap.start();
-            System.out.println("consumerBootstrapRunner started ...");
+            log.info("consumerBootstrapRunner started ...");
         };
     }
 
@@ -43,8 +46,14 @@ public class ConsumerConfig {
 
     @Bean
     public Router router() {
+//        return new GrayRouter(grayRatio);
         return Router.DEFAULT;
     }
+
+//    @Bean
+//    public Filter filter() {
+//        return new CacheFilter();
+//    }
 
     @Bean(initMethod = "start", destroyMethod = "stop")
     public RegistryCenter consumerRegisterCenter() {
