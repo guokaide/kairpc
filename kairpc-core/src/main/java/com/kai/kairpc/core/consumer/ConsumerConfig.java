@@ -1,9 +1,11 @@
 package com.kai.kairpc.core.consumer;
 
+import com.kai.kairpc.core.api.Filter;
 import com.kai.kairpc.core.api.LoadBalancer;
 import com.kai.kairpc.core.api.RegistryCenter;
 import com.kai.kairpc.core.api.Router;
 import com.kai.kairpc.core.cluster.RoundRobinBalancer;
+import com.kai.kairpc.core.filter.ParamsFilter;
 import com.kai.kairpc.core.registry.zk.ZkRegistryCenter;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
@@ -39,6 +41,11 @@ public class ConsumerConfig {
         };
     }
 
+    @Bean(initMethod = "start", destroyMethod = "stop")
+    public RegistryCenter consumerRegisterCenter() {
+        return new ZkRegistryCenter();
+    }
+
     @Bean
     public LoadBalancer loadBalancer() {
         return new RoundRobinBalancer();
@@ -50,13 +57,15 @@ public class ConsumerConfig {
         return Router.DEFAULT;
     }
 
+    @Bean
+    public Filter defaultFilter() {
+        return new ParamsFilter();
+    }
+
 //    @Bean
 //    public Filter filter() {
 //        return new CacheFilter();
 //    }
 
-    @Bean(initMethod = "start", destroyMethod = "stop")
-    public RegistryCenter consumerRegisterCenter() {
-        return new ZkRegistryCenter();
-    }
+
 }

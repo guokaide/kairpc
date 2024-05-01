@@ -8,7 +8,7 @@
 
 全链路的灰度：A -> B -> C -> DB, 路径上的所有组件都要染色，比如说，redis、mysql、mq 等中间件和数据库都要灰度。
 
-可以通过 context 参数传递的方式实现，从 Consumer -> Provider。
+可以通过 context 参数传递的方式实现，从 Consumer -> Provider，参考：[context_params.md](context_params.md)
 
 根据是否染色，确定是否写入到非正常业务使用的 redis、mysql、mq 等中间件。
 

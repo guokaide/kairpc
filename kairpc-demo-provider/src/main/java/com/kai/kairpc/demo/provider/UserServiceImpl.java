@@ -1,6 +1,7 @@
 package com.kai.kairpc.demo.provider;
 
 import com.kai.kairpc.core.annotation.KaiProvider;
+import com.kai.kairpc.core.api.RpcContext;
 import com.kai.kairpc.demo.api.User;
 import com.kai.kairpc.demo.api.UserService;
 import lombok.RequiredArgsConstructor;
@@ -130,5 +131,12 @@ public class UserServiceImpl implements UserService {
     @Override
     public void setTimeoutPorts(String ports) {
         timeoutPorts = ports;
+    }
+
+    @Override
+    public String echoParameter(String key) {
+        System.out.println(" ===> RpcContext.CONTEXT_PARAMETERS: ");
+        RpcContext.getContextParameters().forEach((k, v) -> System.out.println(k + " -> " + v));
+        return RpcContext.getContextParameter(key);
     }
 }

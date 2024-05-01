@@ -1,5 +1,6 @@
 package com.kai.kairpc.core.provider;
 
+import com.kai.kairpc.core.api.RpcContext;
 import com.kai.kairpc.core.api.RpcException;
 import com.kai.kairpc.core.api.RpcRequest;
 import com.kai.kairpc.core.api.RpcResponse;
@@ -22,6 +23,7 @@ public class ProviderInvoker {
     }
 
     public RpcResponse<Object> invoke(RpcRequest request) {
+        processContextParameters(request);
         RpcResponse<Object> rpcResponse = new RpcResponse<>();
         List<ProviderMeta> providerMetas = skeleton.get(request.getService());
         try {
@@ -36,6 +38,8 @@ public class ProviderInvoker {
             rpcResponse.setEx(new RpcException(e.getCause().getMessage()));
         } catch (IllegalAccessException e) {
             rpcResponse.setEx(new RpcException(e.getMessage()));
+        } finally {
+            clearContextParameters();
         }
         return rpcResponse;
     }
@@ -55,6 +59,15 @@ public class ProviderInvoker {
         Optional<ProviderMeta> optional = providerMetas.stream()
                 .filter(x -> x.getMethodSign().equals(methodSign)).findFirst();
         return optional.orElse(null);
+    }
+
+    private void processContextParameters(RpcRequest request) {
+        RpcContext.getContextParameters().putAll(request.getParams());
+    }
+
+    private void clearContextParameters() {
+        // 清理上下文，防止内存泄露和上下文污染
+        RpcContext.clearContextParameters();
     }
 
 }
