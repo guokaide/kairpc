@@ -2,6 +2,7 @@ package com.kai.kairpc.demo.consumer;
 
 import com.kai.kairpc.core.annotation.KaiConsumer;
 import com.kai.kairpc.core.api.Router;
+import com.kai.kairpc.core.api.RpcContext;
 import com.kai.kairpc.core.cluster.GrayRouter;
 import com.kai.kairpc.core.consumer.ConsumerConfig;
 import com.kai.kairpc.demo.api.User;
@@ -171,5 +172,14 @@ public class KairpcDemoConsumerApplication {
         userService.find(1100);
         System.out.println("userService.find(1100) take " + (System.currentTimeMillis() - start) + "ms");
         System.out.println();
+
+        System.out.println("case 19: ==> [测试通过 Context 跨消费者和提供者传参]");
+        String KeyVersion = "rpc.version";
+        RpcContext.setContextParameter(KeyVersion, "v1");
+        System.out.println("c -> p -> c: userService.echoParameter(\"" + KeyVersion + "\") = " + userService.echoParameter(KeyVersion));
+
+        String keyMessage = "rpc.message";
+        RpcContext.setContextParameter(keyMessage, "this is a test message");
+        System.out.println("c -> p -> c: userService.echoParameter(\"" + keyMessage + "\") = " + userService.echoParameter(keyMessage));
     }
 }
