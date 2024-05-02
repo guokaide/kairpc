@@ -11,7 +11,7 @@ GET http://localhost:8081/ports?ports=8084,8094
 GET http://localhost:8088/gray?ratio=100
 
 ### 获取用户信息
-POST http://localhost:8081
+POST http://localhost:8081/kairpc
 Content-Type: application/json
 
 {
@@ -21,7 +21,7 @@ Content-Type: application/json
 }
 
 ### 获取用户信息
-POST http://localhost:8081
+POST http://localhost:8081/kairpc
 Content-Type: application/json
 
 {
@@ -31,21 +31,21 @@ Content-Type: application/json
 }
 
 ### 获取订单信息
-POST http://localhost:8081
+POST http://localhost:8081/kairpc
 Content-Type: application/json
 
 {
 "service": "com.kai.kairpc.demo.api.OrderService",
-"method": "findById",
+"method": "findById@1_int",
 "args": [100]
 }
 
 ### 甚至可以访问 toString 方法，这是不对的
-POST http://localhost:8080
+POST http://localhost:8081/kairpc
 Content-Type: application/json
 
 {
   "service": "com.kai.kairpc.demo.api.OrderService",
-  "method": "toString",
+  "method": "toString@0",
   "args": []
 }
