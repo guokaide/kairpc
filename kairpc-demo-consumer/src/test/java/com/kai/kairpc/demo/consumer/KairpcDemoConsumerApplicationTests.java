@@ -17,11 +17,34 @@ class KairpcDemoConsumerApplicationTests {
 
     @BeforeAll
     static void init() {
+        System.out.println(" ================================== ");
+        System.out.println(" ============ zk 2182 ============= ");
+        System.out.println(" ================================== ");
         zkServer.start();
+        System.out.println(" ================================== ");
+        System.out.println(" ============  p 2094 ============= ");
+        System.out.println(" ================================== ");
         applicationContext = SpringApplication.run(KairpcDemoProviderApplication.class,
                 "--server.port=8084",
-                "--kairpc.zkServer=localhost:2182",
-                "--logging.level.com.kai.kairpc=debug");
+                "--kairpc.zk.server=localhost:2182",
+                "--kairpc.zk.root=kairpc",
+                "--kairpc.app.env=test",
+                "--logging.level.com.kai.kairpc=info",
+                "--kairpc.provider.metas.dc=bj",
+                "--kairpc.provider.metas.gray=false",
+                "--kairpc.provider.metas.unit=B001");
+        System.out.println(" ================================== ");
+        System.out.println(" ============  p 2095 ============= ");
+        System.out.println(" ================================== ");
+        applicationContext = SpringApplication.run(KairpcDemoProviderApplication.class,
+                "--server.port=8085",
+                "--kairpc.zk.server=localhost:2182",
+                "--kairpc.zk.root=kairpc",
+                "--kairpc.app.env=test",
+                "--logging.level.com.kai.kairpc=info",
+                "--kairpc.provider.metas.dc=bj",
+                "--kairpc.provider.metas.gray=false",
+                "--kairpc.provider.metas.unit=B002");
     }
 
     @Test
