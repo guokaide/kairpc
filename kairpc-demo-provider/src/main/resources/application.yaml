@@ -2,14 +2,18 @@ server:
   port: 8081
 
 kairpc:
-  zkServer: localhost:2181
-  zkRoot: kairpc
-
-app:
-  id: app1
-  namespace: public
-  env: dev
-  metas: "{dc: 'bj', gray: 'false', unit: 'B001'}"
+  zk:
+    server: localhost:2181
+    root: kairpc
+  app:
+    id: app1
+    namespace: public
+    env: dev
+  provider:
+    metas:
+      dc: bj
+      unit: B001
+      gray: false
 
 logging:
   level:

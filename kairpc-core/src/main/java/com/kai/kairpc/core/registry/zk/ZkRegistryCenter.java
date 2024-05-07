@@ -30,13 +30,13 @@ import java.util.stream.Collectors;
 @Slf4j
 public class ZkRegistryCenter implements RegistryCenter {
 
-    private static CuratorFramework client = null;
+    private CuratorFramework client = null;
     private final Map<ServiceMeta, TreeCache> treeCaches = new HashMap<>();
 
-    @Value("${kairpc.zkServer}")
+    @Value("${kairpc.zk.server:localhost:2181}")
     private String server;
 
-    @Value("${kairpc.zkRoot}")
+    @Value("${kairpc.zk.root:kairpc}")
     private String root;
 
 
@@ -108,7 +108,7 @@ public class ZkRegistryCenter implements RegistryCenter {
     }
 
     @NotNull
-    private static List<InstanceMeta> mapInstances(List<String> nodes, String servicePath) {
+    private List<InstanceMeta> mapInstances(List<String> nodes, String servicePath) {
         return nodes.stream().map(x -> {
             String[] strings = x.split("_");
             InstanceMeta instance = InstanceMeta.http(strings[0], Integer.valueOf(strings[1]));

@@ -1,8 +1,9 @@
 package com.kai.kairpc.demo.provider;
 
+import com.kai.kairpc.core.annotation.EnableRpc;
 import com.kai.kairpc.core.api.RpcRequest;
 import com.kai.kairpc.core.api.RpcResponse;
-import com.kai.kairpc.core.provider.ProviderConfig;
+import com.kai.kairpc.core.config.ProviderConfig;
 import com.kai.kairpc.core.transport.SpringBootTransport;
 import com.kai.kairpc.demo.api.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -18,6 +19,7 @@ import org.springframework.web.bind.annotation.RestController;
 @SpringBootApplication
 @RestController
 @Import({ProviderConfig.class})
+//@EnableRpc
 public class KairpcDemoProviderApplication {
 
     public static void main(String[] args) {
