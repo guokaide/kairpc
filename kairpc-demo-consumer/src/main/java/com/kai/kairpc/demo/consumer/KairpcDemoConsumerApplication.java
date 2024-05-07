@@ -1,10 +1,10 @@
 package com.kai.kairpc.demo.consumer;
 
+import com.kai.kairpc.core.annotation.EnableRpc;
 import com.kai.kairpc.core.annotation.KaiConsumer;
 import com.kai.kairpc.core.api.Router;
 import com.kai.kairpc.core.api.RpcContext;
 import com.kai.kairpc.core.cluster.GrayRouter;
-import com.kai.kairpc.core.consumer.ConsumerConfig;
 import com.kai.kairpc.demo.api.User;
 import com.kai.kairpc.demo.api.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -12,7 +12,6 @@ import org.springframework.boot.ApplicationRunner;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Import;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
@@ -24,7 +23,8 @@ import java.util.Map;
 
 @RestController
 @SpringBootApplication
-@Import(ConsumerConfig.class)
+//@Import(ConsumerConfig.class)
+@EnableRpc
 public class KairpcDemoConsumerApplication {
 
     @KaiConsumer

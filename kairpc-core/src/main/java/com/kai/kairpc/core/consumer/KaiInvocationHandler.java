@@ -36,9 +36,9 @@ public class KaiInvocationHandler implements InvocationHandler {
 
     final List<InstanceMeta> halfOpenProviders = new ArrayList<>();
 
-    HttpInvoker httpInvoker;
-
     final Map<String, SlidingTimeWindow> windows = new HashMap<>();
+
+    HttpInvoker httpInvoker;
 
     ScheduledExecutorService executor;
 
@@ -46,11 +46,13 @@ public class KaiInvocationHandler implements InvocationHandler {
         this.service = clazz;
         this.context = context;
         this.providers = providers;
-        int timeout = Integer.parseInt(context.getParameters().getOrDefault("app.timeout", "1000"));
+        int timeout = Integer.parseInt(context.getParameters().getOrDefault("consumer.timeout", "1000"));
         this.httpInvoker = new OkHttpInvoker(timeout, timeout, timeout);
         this.executor = Executors.newScheduledThreadPool(1);
         // 2. half open: 每分钟将隔离的节点放出来，对部分流量提供服务，测试其是否恢复
-        this.executor.scheduleWithFixedDelay(this::halfOpen, 10, 60, TimeUnit.SECONDS);
+        int halfOpenInitialDelay = Integer.parseInt(context.getParameters().getOrDefault("consumer.halfOpenInitialDelay", "10000"));
+        int halfOpenDelay = Integer.parseInt(context.getParameters().getOrDefault("consumer.halfOpenDelay", "60000"));
+        this.executor.scheduleWithFixedDelay(this::halfOpen, halfOpenInitialDelay, halfOpenDelay, TimeUnit.MILLISECONDS);
     }
 
     @Override
@@ -64,7 +66,8 @@ public class KaiInvocationHandler implements InvocationHandler {
         rpcRequest.setMethodSign(MethodUtils.methodSign(method));
         rpcRequest.setArgs(args);
 
-        int retries = Integer.parseInt(context.getParameters().getOrDefault("app.retries", "1"));
+        int retries = Integer.parseInt(context.getParameters().getOrDefault("consumer.retries", "1"));
+        int faultLimit = Integer.parseInt(context.getParameters().getOrDefault("consumer.faultLimit", "10"));
 
         while (retries-- > 0) {
 
@@ -111,7 +114,7 @@ public class KaiInvocationHandler implements InvocationHandler {
                         window.record(System.currentTimeMillis());
                         log.debug("instance {} in window with {}", url, window.getSum());
                         // 若 30s 内异常发生了 10 次，就将这个节点隔离，暂时不提供服务
-                        if (window.getSum() >= 10) {
+                        if (window.getSum() >= faultLimit) {
                             isolate(instance);
                         }
                     }

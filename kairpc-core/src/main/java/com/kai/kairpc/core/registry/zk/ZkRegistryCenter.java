@@ -33,10 +33,10 @@ public class ZkRegistryCenter implements RegistryCenter {
     private static CuratorFramework client = null;
     private final Map<ServiceMeta, TreeCache> treeCaches = new HashMap<>();
 
-    @Value("${kairpc.zkServer}")
+    @Value("${kairpc.zk.server:localhost:2181}")
     private String server;
 
-    @Value("${kairpc.zkRoot}")
+    @Value("${kairpc.zk.root:kairpc}")
     private String root;
 
 

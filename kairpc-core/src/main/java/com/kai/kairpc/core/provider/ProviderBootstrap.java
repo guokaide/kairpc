@@ -2,6 +2,8 @@ package com.kai.kairpc.core.provider;
 
 import com.kai.kairpc.core.annotation.KaiProvider;
 import com.kai.kairpc.core.api.RegistryCenter;
+import com.kai.kairpc.core.config.AppConfigProperties;
+import com.kai.kairpc.core.config.ProviderConfigProperties;
 import com.kai.kairpc.core.meta.InstanceMeta;
 import com.kai.kairpc.core.meta.ProviderMeta;
 import com.kai.kairpc.core.meta.ServiceMeta;
@@ -11,7 +13,6 @@ import jakarta.annotation.PreDestroy;
 import lombok.Data;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
 import org.springframework.util.LinkedMultiValueMap;
@@ -34,25 +35,22 @@ public class ProviderBootstrap implements ApplicationContextAware {
 
     RegistryCenter registryCenter;
 
+    private String port;
+
+    private AppConfigProperties appConfigProperties;
+
+    private ProviderConfigProperties providerConfigProperties;
+
     // <InterfaceName, List<ProviderMeta>>
     private MultiValueMap<String, ProviderMeta> skeleton = new LinkedMultiValueMap<>();
 
     private InstanceMeta instance;
 
-    @Value("${server.port}")
-    private String port;
-
-    @Value("${app.id}")
-    private String app;
-
-    @Value("${app.namespace}")
-    private String namespace;
-
-    @Value("${app.env}")
-    private String env;
-
-    @Value("#{${app.metas}}")
-    private Map<String, String> metas;
+    public ProviderBootstrap(String port, AppConfigProperties appConfigProperties, ProviderConfigProperties providerConfigProperties) {
+        this.port = port;
+        this.appConfigProperties = appConfigProperties;
+        this.providerConfigProperties = providerConfigProperties;
+    }
 
     @PostConstruct // init-method，此时所有的 Bean 对象都已经创建好了（new 出来了），但是有可能没有初始化完成
     public void init() {
@@ -76,9 +74,7 @@ public class ProviderBootstrap implements ApplicationContextAware {
     @SneakyThrows
     public void start() {
         String ip = InetAddress.getLocalHost().getHostAddress();
-        this.instance = InstanceMeta.http(ip, Integer.valueOf(port));
-
-        this.instance.getParameters().putAll(metas);
+        this.instance = InstanceMeta.http(ip, Integer.valueOf(port)).addParams(providerConfigProperties.getMetas());
 
         registryCenter.start();
         // 服务注册：将提供的服务注册到注册中心
@@ -92,12 +88,16 @@ public class ProviderBootstrap implements ApplicationContextAware {
     }
 
     private void unregisterService(String service) {
-        ServiceMeta serviceMeta = ServiceMeta.builder().app(app).namespace(namespace).env(env).name(service).build();
+        ServiceMeta serviceMeta = ServiceMeta.builder()
+                .app(appConfigProperties.getApp()).namespace(appConfigProperties.getNamespace())
+                .env(appConfigProperties.getEnv()).name(service).build();
         registryCenter.unregister(serviceMeta, instance);
     }
 
     private void registerService(String service) {
-        ServiceMeta serviceMeta = ServiceMeta.builder().app(app).namespace(namespace).env(env).name(service).build();
+        ServiceMeta serviceMeta = ServiceMeta.builder()
+                .app(appConfigProperties.getApp()).namespace(appConfigProperties.getNamespace())
+                .env(appConfigProperties.getEnv()).name(service).build();
         registryCenter.register(serviceMeta, instance);
     }
 

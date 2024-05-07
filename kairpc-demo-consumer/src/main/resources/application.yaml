@@ -2,17 +2,22 @@ server:
   port: 8088
 
 kairpc:
-  providers: http://localhost:8081,http://localhost:8082,http://localhost:8083
-  zkServer: localhost:2181
-  zkRoot: kairpc
-
-app:
-  id: app1
-  namespace: public
-  env: dev
-  retries: 2
-  timeout: 1000
-  grayRatio: 10 # // 0-100
+  #  static:
+  #    providers: http://localhost:8081,http://localhost:8082,http://localhost:8083
+  zk:
+    server: localhost:2181
+    root: kairpc
+  app:
+    id: app1
+    namespace: public
+    env: dev
+  consumer:
+    retries: 2
+    timeout: 1000
+    faultLimit: 10 # 30s 内10次错误则隔离
+    grayRatio: 0 # [0, 100]
+    halfOpenInitialDelay: 10000
+    halfOpenDelay: 60000
 
 logging:
   level:

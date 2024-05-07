@@ -1,7 +1,7 @@
 package com.kai.kairpc.core.annotation;
 
-import com.kai.kairpc.core.consumer.ConsumerConfig;
-import com.kai.kairpc.core.provider.ProviderConfig;
+import com.kai.kairpc.core.config.ConsumerConfig;
+import com.kai.kairpc.core.config.ProviderConfig;
 import org.springframework.context.annotation.Import;
 
 import java.lang.annotation.*;
