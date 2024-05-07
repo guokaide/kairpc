@@ -5,12 +5,13 @@
 
 	<groupId>com.kai</groupId>
 	<artifactId>kairpc</artifactId>
-	<version>0.0.1-SNAPSHOT</version>
+	<version>${kairpc.version}</version>
 	<name>kairpc</name>
 	<description>kairpc</description>
 	<packaging>pom</packaging>
 
 	<properties>
+		<kairpc.version>0.0.1-SNAPSHOT</kairpc.version>
 		<java.version>17</java.version>
 		<spring.boot.version>3.2.3</spring.boot.version>
 		<maven.compiler.source>17</maven.compiler.source>
@@ -23,5 +24,35 @@
 		<module>kairpc-demo-provider</module>
 		<module>kairpc-demo-consumer</module>
 	</modules>
+
+	<build>
+		<plugins>
+			<plugin>
+				<groupId>org.codehaus.mojo</groupId>
+				<artifactId>flatten-maven-plugin</artifactId>
+				<version>1.5.0</version>
+				<configuration>
+					<updatePomFile>true</updatePomFile>
+					<flattenMode>oss</flattenMode>
+				</configuration>
+				<executions>
+					<execution>
+						<id>flatten</id>
+						<goals>
+							<goal>flatten</goal>
+						</goals>
+						<phase>process-resources</phase>
+					</execution>
+					<execution>
+						<id>flatten.clean</id>
+						<goals>
+							<goal>clean</goal>
+						</goals>
+						<phase>clean</phase>
+					</execution>
+				</executions>
+			</plugin>
+		</plugins>
+	</build>
 
 </project>

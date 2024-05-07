@@ -5,10 +5,10 @@
     <parent>
         <groupId>com.kai</groupId>
         <artifactId>kairpc</artifactId>
-        <version>0.0.1-SNAPSHOT</version>
+        <version>${kairpc.version}</version>
     </parent>
     <artifactId>kairpc-demo-consumer</artifactId>
-    <version>0.0.1-SNAPSHOT</version>
+    <version>${kairpc.version}</version>
     <name>kairpc-demo-consumer</name>
     <description>kairpc-demo-consumer</description>
 
