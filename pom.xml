@@ -3,12 +3,46 @@
 	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 
-	<groupId>com.kai</groupId>
+	<groupId>io.github.guokaide</groupId>
 	<artifactId>kairpc</artifactId>
 	<version>${kairpc.version}</version>
 	<name>kairpc</name>
 	<description>kairpc</description>
 	<packaging>pom</packaging>
+
+	<!-- url -->
+	<url>https://github.com/guokaide/kairpc</url>
+
+	<!-- 开源协议  -->
+	<licenses>
+		<license>
+			<name>The Apache Software License, Version 2.0</name>
+			<url>http://www.apache.org/licenses/LICENSE-2.0.txt</url>
+			<distribution>repo</distribution>
+		</license>
+	</licenses>
+
+	<!-- issue 管理工具 -->
+	<issueManagement>
+		<system>github</system>
+		<url>https://github.com/guokaide/kairpc/issues</url>
+	</issueManagement>
+
+	<!-- 源代码管理工具 -->
+	<scm>
+		<connection>scm:git:https://github.com/guokaide/kairpc.git</connection>
+		<developerConnection>scm:git:https://github.com/guokaide/kairpc.git</developerConnection>
+		<url>https://github.com/guokaide/kairpc</url>
+	</scm>
+
+	<!-- 开发者信息 -->
+	<developers>
+		<developer>
+			<name>kai</name>
+			<email>kaideguo@gmail.com</email>
+			<url>https://github.com/guokaide</url>
+		</developer>
+	</developers>
 
 	<properties>
 		<kairpc.version>0.0.1-SNAPSHOT</kairpc.version>
@@ -27,6 +61,7 @@
 
 	<build>
 		<plugins>
+			<!-- pom -->
 			<plugin>
 				<groupId>org.codehaus.mojo</groupId>
 				<artifactId>flatten-maven-plugin</artifactId>
@@ -52,7 +87,94 @@
 					</execution>
 				</executions>
 			</plugin>
+			<!-- source code -->
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-source-plugin</artifactId>
+				<version>3.1.0</version>
+				<inherited>true</inherited>
+				<executions>
+					<execution>
+						<id>attach-sources</id>
+						<goals>
+							<goal>jar</goal>
+						</goals>
+					</execution>
+				</executions>
+				<configuration>
+					<excludeResources>true</excludeResources>
+					<useDefaultExcludes>true</useDefaultExcludes>
+				</configuration>
+			</plugin>
+			<!-- javadoc -->
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-javadoc-plugin</artifactId>
+				<version>3.1.0</version>
+				<inherited>true</inherited>
+				<executions>
+					<execution>
+						<id>bundle-sources</id>
+						<phase>package</phase>
+						<goals>
+							<goal>jar</goal>
+						</goals>
+					</execution>
+				</executions>
+				<configuration>
+					<maxmemory>1024</maxmemory>
+					<encoding>UTF-8</encoding>
+					<show>protected</show>
+					<notree>true</notree>
+
+					<!-- Avoid running into Java 8's very restrictive doclint issues -->
+					<failOnError>false</failOnError>
+					<doclint>none</doclint>
+				</configuration>
+			</plugin>
 		</plugins>
 	</build>
+
+    <profiles>
+        <profile>
+            <id>release</id>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-gpg-plugin</artifactId>
+                        <version>1.6</version>
+                        <executions>
+                            <execution>
+                                <id>sign-artifacts</id>
+                                <phase>verify</phase>
+                                <goals>
+                                    <goal>sign</goal>
+                                </goals>
+                            </execution>
+                        </executions>
+                    </plugin>
+                    <!-- https://central.sonatype.org/publish/publish-portal-maven/#deploymentname -->
+                    <plugin>
+                        <groupId>org.sonatype.central</groupId>
+                        <artifactId>central-publishing-maven-plugin</artifactId>
+                        <version>0.4.0</version>
+                        <extensions>true</extensions>
+                        <configuration>
+                            <publishingServerId>central</publishingServerId>
+                            <tokenAuth>true</tokenAuth>
+                            <autoPublish>true</autoPublish>
+                            <excludeArtifacts>
+								<!-- 示例代码无需上传 -->
+                                <excludeArtifact>kairpc-demo-api</excludeArtifact>
+                                <excludeArtifact>kairpc-demo-provider</excludeArtifact>
+                                <excludeArtifact>kairpc-demo-consumer</excludeArtifact>
+                            </excludeArtifacts>
+                        </configuration>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+    </profiles>
 
 </project>
