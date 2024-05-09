@@ -45,7 +45,7 @@
 	</developers>
 
 	<properties>
-		<kairpc.version>0.0.1-SNAPSHOT</kairpc.version>
+		<kairpc.version>0.0.1</kairpc.version>
 		<java.version>17</java.version>
 		<spring.boot.version>3.2.3</spring.boot.version>
 		<maven.compiler.source>17</maven.compiler.source>
