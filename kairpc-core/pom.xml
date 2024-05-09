@@ -3,13 +3,13 @@
 	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 	<parent>
-		<groupId>com.kai</groupId>
+		<groupId>io.github.guokaide</groupId>
 		<artifactId>kairpc</artifactId>
-		<version>0.0.1-SNAPSHOT</version>
+		<version>${kairpc.version}</version>
 	</parent>
 
 	<artifactId>kairpc-core</artifactId>
-	<version>0.0.1-SNAPSHOT</version>
+	<version>${kairpc.version}</version>
 	<name>kairpc-core</name>
 	<description>kairpc-core</description>
 
