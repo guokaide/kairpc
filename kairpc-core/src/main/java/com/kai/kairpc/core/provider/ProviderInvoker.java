@@ -4,28 +4,51 @@ import com.kai.kairpc.core.api.RpcContext;
 import com.kai.kairpc.core.api.RpcException;
 import com.kai.kairpc.core.api.RpcRequest;
 import com.kai.kairpc.core.api.RpcResponse;
+import com.kai.kairpc.core.governance.SlidingTimeWindow;
 import com.kai.kairpc.core.meta.ProviderMeta;
 import com.kai.kairpc.core.util.TypeUtils;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.util.MultiValueMap;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Type;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
+@Slf4j
 public class ProviderInvoker {
 
     private final MultiValueMap<String, ProviderMeta> skeleton;
+    private final Map<String, SlidingTimeWindow> serviceSlidingTimeWindows = new HashMap<>();
+    // TODO: 对服务实例做全局限流
+    private final Map<String, String> trafficControls;
 
     public ProviderInvoker(ProviderBootstrap providerBootstrap) {
         this.skeleton = providerBootstrap.getSkeleton();
+        this.trafficControls = providerBootstrap.getProviderConfigProperties().getTrafficControls();
     }
 
     public RpcResponse<Object> invoke(RpcRequest request) {
         processContextParameters(request);
+
+        String service = request.getService();
+        int trafficControl = Integer.parseInt(trafficControls.getOrDefault(service, "20"));
+        synchronized (serviceSlidingTimeWindows) {
+            SlidingTimeWindow window = serviceSlidingTimeWindows.computeIfAbsent(service, k -> new SlidingTimeWindow());
+            int invoked = window.calcSum();
+            if (invoked > trafficControl) {
+                throw new RpcException("Service " + service + " invoked [" + invoked + "] times in 30s, larger than tpsLimit: "
+                        + trafficControl, RpcException.EXCEED_LIMIT_EX);
+            }
+            window.record(System.currentTimeMillis());
+            log.debug("Service {} in window with {}", service, window.getSum());
+        }
+
         RpcResponse<Object> rpcResponse = new RpcResponse<>();
-        List<ProviderMeta> providerMetas = skeleton.get(request.getService());
+        List<ProviderMeta> providerMetas = skeleton.get(service);
         try {
             ProviderMeta meta = findProviderMeta(providerMetas, request.getMethodSign());
             Method method = meta.getMethod();

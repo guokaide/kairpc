@@ -2,24 +2,27 @@ package com.kai.kairpc.core.governance;
 
 import lombok.ToString;
 
+/**
+ * 环形缓冲区：用于存储窗口内的数据点
+ */
 @ToString
 public class RingBuffer {
 
     final int size;
     final int[] ring;
 
-    public RingBuffer(int _size) {
+    public RingBuffer(int size) {
         // check size > 0
-        this.size = _size;
+        this.size = size;
         this.ring = new int[this.size];
     }
 
     public int sum() {
-        int _sum = 0;
+        int sum = 0;
         for (int i = 0; i < this.size; i++) {
-            _sum += ring[i];
+            sum += ring[i];
         }
-        return _sum;
+        return sum;
     }
 
     public void reset() {
