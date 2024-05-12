@@ -16,4 +16,6 @@ public class ProviderConfigProperties {
 
     private Map<String, String> metas = new HashMap<>();
 
+    private Map<String, String> trafficControls = new HashMap<>();
+
 }

@@ -1,6 +1,6 @@
 package com.kai.kairpc.demo.provider;
 
-import com.kai.kairpc.core.annotation.EnableRpc;
+import com.kai.kairpc.core.api.RpcException;
 import com.kai.kairpc.core.api.RpcRequest;
 import com.kai.kairpc.core.api.RpcResponse;
 import com.kai.kairpc.core.config.ProviderConfig;
@@ -60,6 +60,21 @@ public class KairpcDemoProviderApplication {
             request1.setArgs(new Object[]{100, "Kai"});
             RpcResponse<Object> response1 = transport.invoke(request);
             System.out.println("return : " + response1.getData());
+
+            // 3. test traffic control
+//            RpcRequest request2 = new RpcRequest();
+//            request2.setService("com.kai.kairpc.demo.api.UserService");
+//            request2.setMethodSign("findById@1_int");
+//            request2.setArgs(new Object[]{100});
+//            for (int i = 0; i < 100; i++) {
+//                Thread.sleep(1000);
+//                try {
+//                    RpcResponse<Object> response2 = transport.invoke(request2);
+//                    System.out.println(i + " >>> " + response2.getData());
+//                } catch (RpcException e) {
+//                    System.out.println(i + " >>> " + e.getMessage() + " -> " + e.getErrCode());
+//                }
+//            }
         };
     }
 
