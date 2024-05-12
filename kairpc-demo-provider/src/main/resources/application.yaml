@@ -17,7 +17,21 @@ kairpc:
     trafficControls:
       com.kai.kairpc.demo.api.UserService: 25
 
+app:
+  id: kai-rpc
+apollo:
+  meta: http://kimmking.cn:8080 # Apollo 配置中心元数据服务地址
+  cluster: default
+  cacheDir: /Users/kai/tools/apollo/data
+  autoUpdateInjectedSpringProperties: true # 是否开启 Spring 参数自动更新
+  bootstrap:
+    enabled: true # 是否开启 Apollo
+    namespaces: app.yml # Apollo 配置中心要加载的配置文件列表
+    eagerLoad:
+      enabled: false # 是否将 Apollo 加载提到初始化日志系统之前
+
 logging:
   level:
     root: error
     com.kai.kairpc: info
+    com.ctrip: info

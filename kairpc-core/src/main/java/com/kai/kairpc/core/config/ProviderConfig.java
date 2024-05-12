@@ -25,21 +25,21 @@ import org.springframework.core.annotation.Order;
  */
 @Slf4j
 @Configuration
-@Import({AppConfigProperties.class, ProviderConfigProperties.class, SpringBootTransport.class})
+@Import({AppProperties.class, ProviderProperties.class, SpringBootTransport.class})
 public class ProviderConfig {
 
     @Value("${server.port:8080}")
     private String port;
 
     @Autowired
-    AppConfigProperties appConfigProperties;
+    AppProperties appProperties;
 
     @Autowired
-    ProviderConfigProperties providerConfigProperties;
+    ProviderProperties providerProperties;
 
     @Bean
     ProviderBootstrap providerBootstrap() {
-        return new ProviderBootstrap(port, appConfigProperties, providerConfigProperties);
+        return new ProviderBootstrap(port, appProperties, providerProperties);
     }
 
     @Bean
@@ -51,6 +51,12 @@ public class ProviderConfig {
     @ConditionalOnMissingBean
     public RegistryCenter providerRegisterCenter() {
         return new ZkRegistryCenter();
+    }
+
+    @Bean
+    @ConditionalOnMissingBean
+    public ApolloChangedListener consumerApolloChangedListener() {
+        return new ApolloChangedListener();
     }
 
     @Bean

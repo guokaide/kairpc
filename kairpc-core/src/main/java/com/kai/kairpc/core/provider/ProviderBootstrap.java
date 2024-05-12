@@ -2,8 +2,8 @@ package com.kai.kairpc.core.provider;
 
 import com.kai.kairpc.core.annotation.KaiProvider;
 import com.kai.kairpc.core.api.RegistryCenter;
-import com.kai.kairpc.core.config.AppConfigProperties;
-import com.kai.kairpc.core.config.ProviderConfigProperties;
+import com.kai.kairpc.core.config.AppProperties;
+import com.kai.kairpc.core.config.ProviderProperties;
 import com.kai.kairpc.core.meta.InstanceMeta;
 import com.kai.kairpc.core.meta.ProviderMeta;
 import com.kai.kairpc.core.meta.ServiceMeta;
@@ -37,19 +37,19 @@ public class ProviderBootstrap implements ApplicationContextAware {
 
     private String port;
 
-    private AppConfigProperties appConfigProperties;
+    private AppProperties appProperties;
 
-    private ProviderConfigProperties providerConfigProperties;
+    private ProviderProperties providerProperties;
 
     // <InterfaceName, List<ProviderMeta>>
     private MultiValueMap<String, ProviderMeta> skeleton = new LinkedMultiValueMap<>();
 
     private InstanceMeta instance;
 
-    public ProviderBootstrap(String port, AppConfigProperties appConfigProperties, ProviderConfigProperties providerConfigProperties) {
+    public ProviderBootstrap(String port, AppProperties appProperties, ProviderProperties providerProperties) {
         this.port = port;
-        this.appConfigProperties = appConfigProperties;
-        this.providerConfigProperties = providerConfigProperties;
+        this.appProperties = appProperties;
+        this.providerProperties = providerProperties;
     }
 
     @PostConstruct // init-method，此时所有的 Bean 对象都已经创建好了（new 出来了），但是有可能没有初始化完成
@@ -74,7 +74,7 @@ public class ProviderBootstrap implements ApplicationContextAware {
     @SneakyThrows
     public void start() {
         String ip = InetAddress.getLocalHost().getHostAddress();
-        this.instance = InstanceMeta.http(ip, Integer.valueOf(port)).addParams(providerConfigProperties.getMetas());
+        this.instance = InstanceMeta.http(ip, Integer.valueOf(port)).addParams(providerProperties.getMetas());
 
         registryCenter.start();
         // 服务注册：将提供的服务注册到注册中心
@@ -89,15 +89,15 @@ public class ProviderBootstrap implements ApplicationContextAware {
 
     private void unregisterService(String service) {
         ServiceMeta serviceMeta = ServiceMeta.builder()
-                .app(appConfigProperties.getApp()).namespace(appConfigProperties.getNamespace())
-                .env(appConfigProperties.getEnv()).name(service).build();
+                .app(appProperties.getApp()).namespace(appProperties.getNamespace())
+                .env(appProperties.getEnv()).name(service).build();
         registryCenter.unregister(serviceMeta, instance);
     }
 
     private void registerService(String service) {
         ServiceMeta serviceMeta = ServiceMeta.builder()
-                .app(appConfigProperties.getApp()).namespace(appConfigProperties.getNamespace())
-                .env(appConfigProperties.getEnv()).name(service).build();
+                .app(appProperties.getApp()).namespace(appProperties.getNamespace())
+                .env(appProperties.getEnv()).name(service).build();
         registryCenter.register(serviceMeta, instance);
     }
 
