@@ -1,5 +1,7 @@
 package com.kai.kairpc.core.api;
 
+import com.kai.kairpc.core.config.AppProperties;
+import com.kai.kairpc.core.config.ConsumerProperties;
 import com.kai.kairpc.core.meta.InstanceMeta;
 import lombok.Data;
 
@@ -15,6 +17,11 @@ public class RpcContext {
     Router<InstanceMeta> router;
     LoadBalancer<InstanceMeta> loadBalancer;
     private Map<String, String> parameters = new ConcurrentHashMap<>();
+
+    private AppProperties appProperties;
+
+    // 这里引入 Bean, 而不是引入属性值，是为了动态更新 Bean 的属性时，使用此 Bean 的地方均可以更新
+    private ConsumerProperties consumerProperties;
 
     // 上下文参数
     public static final ThreadLocal<Map<String, String>> CONTEXT_PARAMETERS = ThreadLocal.withInitial(HashMap::new);

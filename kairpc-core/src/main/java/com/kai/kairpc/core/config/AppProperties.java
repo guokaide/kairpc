@@ -2,12 +2,10 @@ package com.kai.kairpc.core.config;
 
 import lombok.Data;
 import org.springframework.boot.context.properties.ConfigurationProperties;
-import org.springframework.context.annotation.Configuration;
 
 @Data
-@Configuration
 @ConfigurationProperties(prefix = "kairpc.app")
-public class AppConfigProperties {
+public class AppProperties {
 
     private String app = "app1";
 

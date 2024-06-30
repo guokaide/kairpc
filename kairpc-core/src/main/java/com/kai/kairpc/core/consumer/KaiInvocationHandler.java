@@ -32,26 +32,27 @@ public class KaiInvocationHandler implements InvocationHandler {
 
     final List<InstanceMeta> providers;
 
+    final HttpInvoker httpInvoker;
+
+    final ScheduledExecutorService executor;
+
     final List<InstanceMeta> isolatedProviders = new ArrayList<>();
 
     final List<InstanceMeta> halfOpenProviders = new ArrayList<>();
 
     final Map<String, SlidingTimeWindow> windows = new HashMap<>();
 
-    HttpInvoker httpInvoker;
-
-    ScheduledExecutorService executor;
 
     public KaiInvocationHandler(Class<?> clazz, RpcContext context, List<InstanceMeta> providers) {
         this.service = clazz;
         this.context = context;
         this.providers = providers;
-        int timeout = Integer.parseInt(context.getParameters().getOrDefault("consumer.timeout", "1000"));
+        int timeout = context.getConsumerProperties().getTimeout();
         this.httpInvoker = new OkHttpInvoker(timeout, timeout, timeout);
         this.executor = Executors.newScheduledThreadPool(1);
         // 2. half open: 每分钟将隔离的节点放出来，对部分流量提供服务，测试其是否恢复
-        int halfOpenInitialDelay = Integer.parseInt(context.getParameters().getOrDefault("consumer.halfOpenInitialDelay", "10000"));
-        int halfOpenDelay = Integer.parseInt(context.getParameters().getOrDefault("consumer.halfOpenDelay", "60000"));
+        int halfOpenInitialDelay = context.getConsumerProperties().getHalfOpenInitialDelay();
+        int halfOpenDelay = context.getConsumerProperties().getHalfOpenDelay();
         this.executor.scheduleWithFixedDelay(this::halfOpen, halfOpenInitialDelay, halfOpenDelay, TimeUnit.MILLISECONDS);
     }
 
@@ -66,8 +67,8 @@ public class KaiInvocationHandler implements InvocationHandler {
         rpcRequest.setMethodSign(MethodUtils.methodSign(method));
         rpcRequest.setArgs(args);
 
-        int retries = Integer.parseInt(context.getParameters().getOrDefault("consumer.retries", "1"));
-        int faultLimit = Integer.parseInt(context.getParameters().getOrDefault("consumer.faultLimit", "10"));
+        int retries = context.getConsumerProperties().getRetries();
+        int faultLimit = context.getConsumerProperties().getFaultLimit();
 
         while (retries-- > 0) {
 

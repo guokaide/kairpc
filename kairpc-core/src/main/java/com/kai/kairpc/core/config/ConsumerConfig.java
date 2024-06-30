@@ -30,14 +30,14 @@ import java.util.List;
  */
 @Slf4j
 @Configuration
-@Import({AppConfigProperties.class, ConsumerConfigProperties.class})
+@Import({AppProperties.class, ConsumerProperties.class})
 public class ConsumerConfig {
 
     @Autowired
-    AppConfigProperties appConfigProperties;
+    AppProperties appProperties;
 
     @Autowired
-    ConsumerConfigProperties consumerConfigProperties;
+    ConsumerProperties consumerProperties;
 
     @Bean
     ConsumerBootstrap consumerBootstrap() {
@@ -63,13 +63,19 @@ public class ConsumerConfig {
     }
 
     @Bean
+    @ConditionalOnMissingBean
+    public ApolloChangedListener consumerApolloChangedListener() {
+        return new ApolloChangedListener();
+    }
+
+    @Bean
     public LoadBalancer<InstanceMeta> loadBalancer() {
         return new RoundRobinBalancer<>();
     }
 
     @Bean
     public Router<InstanceMeta> router() {
-        return new GrayRouter(consumerConfigProperties.getGrayRatio());
+        return new GrayRouter(consumerProperties.getGrayRatio());
     }
 
     @Bean
@@ -89,14 +95,8 @@ public class ConsumerConfig {
         rpcContext.setRouter(router);
         rpcContext.setLoadBalancer(loadBalancer);
         rpcContext.setFilters(filters);
-        rpcContext.getParameters().put("app.id", appConfigProperties.getApp());
-        rpcContext.getParameters().put("app.namespace", appConfigProperties.getNamespace());
-        rpcContext.getParameters().put("app.env", appConfigProperties.getEnv());
-        rpcContext.getParameters().put("consumer.retries", String.valueOf(consumerConfigProperties.getRetries()));
-        rpcContext.getParameters().put("consumer.timeout", String.valueOf(consumerConfigProperties.getTimeout()));
-        rpcContext.getParameters().put("consumer.faultLimit", String.valueOf(consumerConfigProperties.getFaultLimit()));
-        rpcContext.getParameters().put("consumer.halfOpenDelay", String.valueOf(consumerConfigProperties.getHalfOpenDelay()));
-        rpcContext.getParameters().put("consumer.halfOpenInitialDelay", String.valueOf(consumerConfigProperties.getHalfOpenInitialDelay()));
+        rpcContext.setAppProperties(appProperties);
+        rpcContext.setConsumerProperties(consumerProperties);
         return rpcContext;
     }
 

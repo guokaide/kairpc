@@ -28,7 +28,7 @@ public class ProviderInvoker {
 
     public ProviderInvoker(ProviderBootstrap providerBootstrap) {
         this.skeleton = providerBootstrap.getSkeleton();
-        this.trafficControls = providerBootstrap.getProviderConfigProperties().getTrafficControls();
+        this.trafficControls = providerBootstrap.getProviderProperties().getTrafficControls();
     }
 
     public RpcResponse<Object> invoke(RpcRequest request) {
@@ -36,6 +36,7 @@ public class ProviderInvoker {
 
         String service = request.getService();
         int trafficControl = Integer.parseInt(trafficControls.getOrDefault(service, "20"));
+        log.info("service {} tpsLimit = {}", service, trafficControl);
         synchronized (serviceSlidingTimeWindows) {
             SlidingTimeWindow window = serviceSlidingTimeWindows.computeIfAbsent(service, k -> new SlidingTimeWindow());
             int invoked = window.calcSum();
