@@ -4,7 +4,6 @@ import lombok.Data;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 
 @Data
-//@Configuration
 @ConfigurationProperties(prefix = "kairpc.consumer")
 public class ConsumerProperties {
 

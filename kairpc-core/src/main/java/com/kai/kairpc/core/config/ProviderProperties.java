@@ -7,7 +7,6 @@ import java.util.HashMap;
 import java.util.Map;
 
 @Data
-//@Configuration
 @ConfigurationProperties(prefix = "kairpc.provider")
 public class ProviderProperties {
 
