@@ -48,6 +48,7 @@
 		<kairpc.version>0.0.2-SNAPSHOT</kairpc.version>
 		<java.version>17</java.version>
 		<spring.boot.version>3.2.3</spring.boot.version>
+		<apollo.version>2.2.0</apollo.version>
 		<maven.compiler.source>17</maven.compiler.source>
 		<maven.compiler.target>17</maven.compiler.target>
 	</properties>
