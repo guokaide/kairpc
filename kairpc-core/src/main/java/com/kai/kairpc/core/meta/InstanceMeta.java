@@ -3,6 +3,7 @@ package com.kai.kairpc.core.meta;
 import com.alibaba.fastjson.JSON;
 import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 
 import java.util.HashMap;
@@ -14,6 +15,7 @@ import java.util.Map;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
+@EqualsAndHashCode(of = {"schema", "host", "port", "context"})
 public class InstanceMeta {
 
     // 核心参数
