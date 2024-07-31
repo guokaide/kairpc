@@ -14,8 +14,24 @@ kairpc:
       dc: bj
       unit: B001
       gray: false
+    trafficControls:
+      com.kai.kairpc.demo.api.UserService: 25
+
+app:
+  id: kai-rpc
+apollo:
+  meta: http://localhost:8080
+  cluster: default
+  cacheDir: /Users/kai/tools/apollo/data
+  autoUpdateInjectedSpringProperties: true
+  bootstrap:
+    enabled: true
+    namespaces: app1
+    eagerLoad:
+      enabled: false
 
 logging:
   level:
-    root: error
+    root: info
     com.kai.kairpc: info
+    com.ctrip: debug
