@@ -7,7 +7,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 public class RoundRobinBalancer<T> implements LoadBalancer<T> {
 
-    AtomicInteger index = new AtomicInteger(0);
+    private final AtomicInteger index = new AtomicInteger(0);
 
     @Override
     public T choose(List<T> providers) {
